@@ -25,10 +25,21 @@ Features
 
 Installation Instructions
 
-Clone the repository: git clone https://github.com/rapondal/ecommerce
-Import SQL file: Open phpMyAdmin, create a new database, and import the file found in "/database/ecommerce_db.sql"
-Configure Database: Update "db_connect.php" or your database connection file with your local credentials (DB Name, Username, Password).
-Start Local Server: Move the folder to "htdocs" (XAMPP) and access it via "localhost/ecommerce"
+1) Clone the repository: git clone https://github.com/Mamaw321/Tropicart
+2) Import SQL file: Open phpMyAdmin, create a new database, and import the file found in "/database/Tropicart_db.sql"
+3) Configure Database: Update "db.php" or your database connection file with your local credentials (DB Name, Username, Password).
+4) Start Local Server: Move the folder to "htdocs" (XAMPP) and access it via "localhost/Tropicart"
+
+Admin Login
+
+
+Project Structure
+
+
+User_Side
+
+
+Admin Side
 
 
 
