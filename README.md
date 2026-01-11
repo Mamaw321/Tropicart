@@ -75,13 +75,13 @@ Admin Login
 
 Members
 Group Name - Qwerty
-1) Elaine Mae Sandigan - Role (Front-end Developer and Backend Developer) 
-2) Jeremiah Roilo -  Role (Documentation) 
-3) Mikylla Nicole Jereza - Role (Documentation) 
-4) Christine Juban - Role (Documentation) 
-5) Lyca Mondejar - Role (Documentation)
-6) Trixie Nicole Jastillana - Role (Documentation)
-7) Mary Rose Arguelles - Role (Documentation)
+1) Elaine Mae Sandigan - Role (Senior Front-end Developer and Senior Backend Developer) 
+2) Jeremiah Roilo -  Role (Junior Front End Developer & Documentation) 
+3) Mikylla Nicole Jereza - Role (Junior Front End Developer & Documentation)
+4) Christine Juban - Role (Junior Front End Developer & Documentation ) 
+5) Lyca Mondejar - Role (Junior Front End Developer & Documentation)
+6) Trixie Nicole Jastillana - Role (Junior Front End Developer & Documentation)
+7) Mary Rose Arguelles - Role (Junior Front End Developer & Documentation)
 
 
 
