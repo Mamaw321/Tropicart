@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tropicart | Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/feather-icons"></script> 
+
+<style>
+    /* =========================================
+       1. COLOR PALETTE & BASE
+    ========================================= */
+    :root {
+        --tropicart-main: #febaba; /* Primary pink/salmon */
+        --tropicart-dark: #d69494; /* Darker shade for accents/buttons */
+        --tropicart-light: #fff0f0; /* Light shade for subtle backgrounds */
+        
+        --text-dark: #2a3342;
+        --text-light-gray: #6c757d;
+        --text-white: #ffffff;
+        --background-page: #f0f2f5; 
+        --white-card: #ffffff;
+        --border-light: #e0e0e0;
+        --shadow-subtle: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        background-color: var(--background-page);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    /* =========================================
+       2. REGISTER CONTAINER (SPLIT LAYOUT)
+    ========================================= */
+    .register-container {
+        display: flex;
+        background: var(--white-card);
+        border-radius: 12px;
+        box-shadow: var(--shadow-subtle);
+        overflow: hidden; 
+        max-width: 900px; 
+        width: 90%; 
+        min-height: 550px; 
+    }
+
+    .register-form-area {
+        flex: 1; 
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background-color: var(--white-card);
+    }
+
+    .register-image-area {
+        flex: 1; 
+        background-size: cover;
+        background-position: center;
+        /* === PASTE YOUR LOCAL IMAGE PATH HERE === */
+        /* Using the same image for consistency, but you can change it */
+        background-image: url('uploads/herobannerfinal.png'); 
+        /* ============================================ */
+    }
+
+    /* =========================================
+       3. FORM ELEMENTS
+    ========================================= */
+    .logo {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--tropicart-main);
+        margin-bottom: 20px;
+    }
+
+    .welcome-text h1 {
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 5px;
+    }
+
+    .welcome-text p {
+        font-size: 14px;
+        color: var(--text-light-gray);
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        color: var(--text-dark);
+        margin-bottom: 5px;
+        text-align: left;
+        font-weight: 500;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        font-size: 15px;
+        color: var(--text-dark);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--tropicart-dark);
+        box-shadow: 0 0 0 2px var(--tropicart-light);
+    }
+
+    /* Buttons */
+    .button-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px; /* Space above buttons */
+        margin-bottom: 30px;
+    }
+
+    .register-btn, .login-btn-secondary {
+        flex: 1;
+        padding: 14px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .register-btn {
+        background-color: var(--tropicart-main); /* Main button */
+        color: var(--text-dark);
+    }
+    .register-btn:hover {
+        background-color: var(--tropicart-dark);
+        color: var(--text-white);
+    }
+
+    .login-btn-secondary {
+        background-color: transparent;
+        color: var(--text-dark);
+        border: 1px solid var(--border-light);
+    }
+    .login-btn-secondary:hover {
+        background-color: var(--tropicart-light);
+        border-color: var(--tropicart-dark);
+    }
+
+    /* Terms and Conditions */
+    .terms-text {
+        font-size: 12px;
+        color: var(--text-light-gray);
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    .terms-text a {
+        color: var(--tropicart-dark);
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .terms-text a:hover {
+        text-decoration: underline;
+    }
+
+    /* =========================================
+       4. RESPONSIVENESS
+    ========================================= */
+    @media (max-width: 768px) {
+        .register-container {
+            flex-direction: column; 
+            max-width: 400px; 
+        }
+        .register-image-area {
+            height: 200px; 
+            width: 100%; 
+        }
+        .register-form-area {
+            padding: 30px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .welcome-text {
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .register-form-area {
+            padding: 25px;
+        }
+        .welcome-text h1 {
+            font-size: 24px;
+        }
+        .button-group {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="register-container">
+    <div class="register-form-area">
+        <div class="logo">Tropicart</div>
+        
+        <div class="welcome-text">
+            <h1>START YOUR JOURNEY,</h1>
+            <p>Create your new account.</p>
+        </div>
+
+        <form action="register.php" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password" required>
+            </div>
+           
+            
+
+            <div class="button-group">
+                <button type="submit" class="register-btn">Register</button>
+                <button type="button" class="login-btn-secondary" onclick="window.location.href='login.html'">Login</button>
+            </div>
+
+            <p class="terms-text">
+                By registering you agree to Tropicart<br>
+                <a href="#">Terms and Conditions</a> & <a href="#">Privacy policy</a>
+            </p>
+        </form>
+    </div>
+
+    <div class="register-image-area">
+    </div>
+</div>
+
+<script>
+    feather.replace();
+</script>
+
+</body>
+</html>

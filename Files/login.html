@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tropicart Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script> 
+    
+    <style>
+        /* =========================================
+           1. COLOR PALETTE & BASE
+        ========================================= */
+        :root {
+            --tropicart-main: #febaba; /* Your primary pink/salmon */
+            --tropicart-dark: #d69494; /* A darker shade for accents/buttons */
+            --tropicart-light: #fff0f0; /* A very light shade for subtle backgrounds */
+            
+            --text-dark: #2a3342;
+            --text-light-gray: #6c757d;
+            --text-white: #ffffff;
+            --background-page: #f0f2f5; /* Light gray for the overall page background */
+            --white-card: #ffffff;
+            --border-light: #e0e0e0;
+            --shadow-subtle: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-page);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* =========================================
+           2. LOGIN CONTAINER (SPLIT LAYOUT)
+        ========================================= */
+        .login-container {
+            display: flex;
+            background: var(--white-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow-subtle);
+            overflow: hidden; /* Ensures image corners are rounded */
+            max-width: 900px; /* Adjust as needed */
+            width: 90%; /* Responsive width */
+            min-height: 550px; /* Minimum height for the container */
+        }
+
+        .login-form-area {
+            flex: 1; /* Takes up 50% width */
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: var(--white-card);
+        }
+
+        .login-image-area {
+            flex: 1; /* Takes up 50% width */
+            background-size: cover;
+            background-position: center;
+            
+            /* === PASTE YOUR LOCAL IMAGE PATH HERE === */
+            /* Example: background-image: url('bannerhero.jpg'); */
+            background-image: url('uploads/ligin.png'); 
+            /* ============================================ */
+        }
+
+        /* =========================================
+           3. FORM ELEMENTS
+        ========================================= */
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--tropicart-main); /* Tropicart logo color */
+            margin-bottom: 20px;
+        }
+
+        .welcome-text h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .welcome-text p {
+            font-size: 14px;
+            color: var(--text-light-gray);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .form-group input[type="text"], /* Added type="text" here */
+        .form-group input[type="password"],
+        .form-group input[type="email"] { /* Kept type="email" input style for consistency */
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 15px;
+            color: var(--text-dark);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--tropicart-dark);
+            box-shadow: 0 0 0 2px var(--tropicart-light);
+        }
+
+        /* Remember me & Forgot Password */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 13px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            color: var(--text-light-gray);
+        }
+
+        .remember-me input[type="checkbox"] {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--tropicart-dark); /* Color for checked state */
+        }
+
+        .forgot-password {
+            color: var(--text-light-gray);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .forgot-password:hover {
+            color: var(--tropicart-dark);
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .login-btn, .signup-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        .login-btn {
+            background-color: var(--tropicart-main); /* Main button */
+            color: var(--text-dark);
+        }
+        .login-btn:hover {
+            background-color: var(--tropicart-dark);
+            color: var(--text-white);
+        }
+
+        .signup-btn {
+            background-color: transparent;
+            color: var(--text-dark);
+            border: 1px solid var(--border-light);
+        }
+        .signup-btn:hover {
+            background-color: var(--tropicart-light);
+            border-color: var(--tropicart-dark);
+        }
+
+        /* Terms and Conditions */
+        .terms-text {
+            font-size: 12px;
+            color: var(--text-light-gray);
+            line-height: 1.5;
+            text-align: center; /* Center the text */
+        }
+
+        .terms-text a {
+            color: var(--tropicart-dark);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .terms-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* =========================================
+           4. RESPONSIVENESS
+        ========================================= */
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column; /* Stack vertically */
+                max-width: 400px; /* Adjust for smaller screens */
+            }
+            .login-image-area {
+                height: 200px; /* Give the image some height when stacked */
+                width: 100%; /* Take full width */
+            }
+            .login-form-area {
+                padding: 30px;
+            }
+            .logo {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            .welcome-text {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-form-area {
+                padding: 25px;
+            }
+            .welcome-text h1 {
+                font-size: 24px;
+            }
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="login-form-area">
+            <div class="logo">Tropicart</div>
+            
+            <div class="welcome-text">
+                <h1>WELCOME BACK,</h1>
+                <p>Please login to your account.</p>
+            </div>
+
+            <form action="login.php" method="POST">
+                <div class="form-group">
+                    <label for="login">Username or Email</label>
+                    <input type="text" id="login" name="login" placeholder="Enter username or email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="stayLogged">
+                        <label for="stayLogged">Stay logged in</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot password</a>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="login-btn">Login</button>
+                    <button type="button" class="signup-btn" onclick="window.location.href='register.html'">Sign up</button>
+                </div>
+
+                <p class="terms-text">
+                    By signing up you agree to Tropicart<br>
+                    <a href="#">Terms and Conditions</a> & <a href="#">Privacy policy</a>
+                </p>
+            </form>
+        </div>
+
+        <div class="login-image-area">
+        </div>
+    </div>
+
+    <script>
+        // Feather icons init (if you plan to use any in the future)
+        feather.replace();
+    </script>
+
+</body>
+</html>

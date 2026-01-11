@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tropicart - Product Detail</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* --- General Reset & Styles --- */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;}
+body { background-color:#fff; color:#333; display:flex; flex-direction:column; min-height:100vh;}
+a{text-decoration:none; color:inherit;} ul{list-style:none;}
+
+:root {
+    --tropic-pink: #ff8a97;
+    --tropic-green: #70a36f;
+    --text-dark: #2a3342;
+    --text-light: #777;
+    --bg-pill: #f3f3f3;
+}
+
+.container { max-width:1200px; width:100%; padding:60px 40px; margin:0 auto; position:relative; flex:1; }
+
+/* Back Button */
+.back-button { position:absolute; top:40px; left:20px; color:var(--text-light); font-size:35px; cursor:pointer; transition:color 0.2s; z-index:10; }
+.back-button:hover{ color:var(--tropic-pink); }
+
+/* Product Detail */
+.product-detail-wrapper { display:grid; grid-template-columns:1fr 1fr; gap:80px; margin-top:20px; }
+
+/* Left */
+/* Product Gallery (Left Column) */
+.product-gallery {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align top */
+}
+
+/* Main image */
+.main-image {
+    width: 100%;        /* container takes full width */
+    max-width: 600px;   /* optional max width */
+    aspect-ratio: 1 / 1; /* makes it square */
+    overflow: hidden;   /* hide anything outside container */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;  /* makes image fill container, crops if necessary */
+}
+
+
+/* Right */
+.product-info { display:flex; flex-direction:column; position:relative; padding-top:10px; }
+.brand-logo { position:absolute; top:0; right:0; font-size:14px; color:var(--text-light); font-style:italic; }
+.product-title { font-size:38px; font-weight:600; color:var(--text-dark); margin-bottom:10px; line-height:1.2; }
+.product-price-section { display:flex; align-items:baseline; margin-bottom:25px; }
+.product-price { font-size:28px; font-weight:700; color:var(--tropic-pink); }
+.product-description { color:var(--text-light); line-height:1.8; margin-bottom:25px; font-size:15px; }
+.stock-status { color:var(--tropic-green); font-weight:500; margin-bottom:30px; display:flex; align-items:center; font-size:14px; }
+.stock-status i { font-size:10px; margin-right:8px; }
+
+/* Actions */
+.action-row { display:flex; align-items:center; gap:20px; margin-bottom:40px; }
+.quantity-wrapper { display:flex; align-items:center; gap:15px; }
+.quantity-label { font-size:13px; font-weight:700; color:var(--text-dark); text-transform:uppercase; }
+.quantity-selector { display:flex; align-items:center; border:1px solid #e0e0e0; border-radius:4px; }
+.quantity-btn { padding:8px 12px; background:#fff; border:none; cursor:pointer; font-size:16px; color:var(--text-light); }
+.quantity-input { width:40px; text-align:center; border:none; border-left:1px solid #e0e0e0; border-right:1px solid #e0e0e0; padding:8px; font-size:15px; color:var(--text-dark); outline:none; }
+.add-to-cart-btn { background-color:var(--tropic-pink); color:#3d2b2b; padding:12px 35px; border:none; border-radius:30px; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; box-shadow:0 4px 10px rgba(255,138,151,0.3); transition:0.3s; }
+.add-to-cart-btn:hover { background-color:#ff7080; }
+.action-icons { display:flex; gap:15px; }
+.action-icon-btn { color:var(--text-light); font-size:20px; cursor:pointer; transition:color 0.3s; }
+.action-icon-btn:hover { color:var(--tropic-pink); }
+
+/* Responsive */
+@media (max-width:768px){
+    .product-detail-wrapper { grid-template-columns:1fr; gap:40px; }
+    .container { padding:40px 20px; }
+    .brand-logo { position:relative; margin-bottom:5px; }
+    .action-row { flex-wrap:wrap; }
+    .add-to-cart-btn { flex-grow:1; justify-content:center; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <a href="user_product_page.html" class="back-button"><i class="fa-solid fa-chevron-left"></i></a>
+
+    <div class="product-detail-wrapper">
+
+        <!-- LEFT: IMAGE -->
+        <div class="product-gallery">
+            <div class="main-image">
+                <img id="productImage" src="" alt="Loading...">
+            </div>
+        </div>
+
+        <!-- RIGHT: DETAILS -->
+        <div class="product-info">
+            <div class="brand-logo" id="brandTag">organic</div>
+            <h1 class="product-title" id="productName">Loading...</h1>
+            <div class="product-price-section">
+                <span class="product-price" id="productPrice">₱0.00</span>
+            </div>
+            <p class="product-description" id="productDescription">Loading description...</p>
+            <div class="stock-status" id="stockStatus"><i class="fa-solid fa-circle"></i> Checking stock...</div>
+
+            <div class="action-row">
+                <div class="quantity-wrapper">
+                    <span class="quantity-label">QUANTITY</span>
+                    <div class="quantity-selector">
+                        <button class="quantity-btn" id="minusBtn">-</button>
+                        <input type="text" class="quantity-input" id="qtyInput" value="1">
+                        <button class="quantity-btn" id="plusBtn">+</button>
+                    </div>
+                </div>
+
+                <button class="add-to-cart-btn" id="addCartBtn"><i class="fa-solid fa-cart-shopping"></i> ADD TO CART</button>
+
+                <div class="action-icons">
+                    <div class="action-icon-btn"><i class="fa-regular fa-heart"></i></div>
+                    <div class="action-icon-btn"><i class="fa-solid fa-code-compare"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const productId = params.get("product_id");
+
+if (!productId) { alert("Invalid product ID"); }
+
+// Fetch product details
+fetch("user_product_details.php?product_id=" + productId)
+.then(res => res.json())
+.then(data => {
+    if (data.status !== "success") { alert(data.message); return; }
+    const p = data.product;
+
+    document.getElementById("productImage").src = p.image;
+    document.getElementById("productName").textContent = p.name;
+    document.getElementById("productPrice").textContent = "₱" + parseFloat(p.price).toFixed(2);
+    document.getElementById("productDescription").textContent = p.description;
+
+    const stockStatus = document.getElementById("stockStatus");
+    if (p.stock > 0) {
+        stockStatus.innerHTML = '<i class="fa-solid fa-circle"></i> In Stock (' + p.stock + ')';
+        stockStatus.style.color = "#70a36f";
+    } else {
+        stockStatus.innerHTML = '<i class="fa-solid fa-circle"></i> Out of Stock';
+        stockStatus.style.color = "#ff0000";
+    }
+});
+
+// Quantity buttons
+const qtyInput = document.getElementById("qtyInput");
+document.getElementById("minusBtn").onclick = () => { let q = parseInt(qtyInput.value); if (q>1) qtyInput.value=q-1; };
+document.getElementById("plusBtn").onclick = () => { qtyInput.value=parseInt(qtyInput.value)+1; };
+
+// Add to cart (demo)
+document.getElementById("addCartBtn").onclick = () => {
+    alert(`Added ${qtyInput.value} item(s) to cart!`);
+};
+</script>
+
+</body>
+</html>

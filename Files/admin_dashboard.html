@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tropicart Admin - Dashboard Overview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        /* ——— GENERAL ——— */
+        :root {
+            --sidebar-bg: #ffffff;
+            --text: #1a1a1a;
+            --text-dark: #222;
+            --text-muted: #6c6c6c;
+            --hover: #f4f4f4;
+            --active: #eaeaea;
+            --border: #e5e5e5;
+            --radius: 10px;
+            --transition: .2s ease;
+            --primary-color: #333;
+            --accent-color: #555;
+            
+            /* Backgrounds & Colors */
+            --background-page: #eeeeee;
+            --background-sidebar: #ffffff;
+            --background-card: #ffffff;
+            --color-published: #4caf50; /* Success/Completed */
+            --color-danger: #d32f2f; /* Danger/Cancelled */
+            --color-warning: #ffc107; /* Warning/Pending */
+            --color-info: #17a2b8; /* Info/Shipped */
+
+            /* New for Dashboard */
+            --chart-bg: #f8f8f8;
+        }
+
+        * {margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif;}
+        body {background-color:var(--background-page); color:var(--text-dark); display:flex; height:100vh;}
+        a {text-decoration:none; color:inherit;}
+
+        /* --- SIDEBAR --- (Identical to Order List Page) */
+        aside.sidebar{
+            width:219px;
+            background-color:var(--background-sidebar);
+            padding:20px;
+            box-shadow:2px 0 10px rgba(0,0,0,0.05);
+            overflow-y:auto;
+        }
+        .sidebar-logo{font-size:1.3rem; font-weight:700; color:var(--primary-color); margin-bottom:30px;}
+        .sidebar-nav ul{list-style:none; display:flex; flex-direction:column; gap:8px;}
+
+        .sidebar-nav a, .sidebar-nav button.nav-item { 
+            display:flex; align-items:center; padding:10px; border-radius:10px;
+            color:var(--text-muted); transition:background 0.2s, color 0.2s;
+            background: none; border: none; width: 100%; text-align: left; cursor: pointer;
+        }
+
+        .sidebar-nav a:hover:not(.active), .sidebar-nav button.nav-item:hover:not(.active){
+            background-color:#f0f0f0; color:var(--text-dark);
+        }
+
+        .sidebar-nav a.active{
+            background-color:#e0e0e0; color:var(--primary-color); font-weight:600;
+        }
+        
+        .sidebar-nav button.nav-item.open{
+            background-color:#e0e0e0; color:var(--primary-color); font-weight:600;
+        }
+
+        .sidebar-nav a svg, .sidebar-nav button.nav-item svg {width:18px; height:18px; margin-right:10px;}
+        .divider { width: 100%; height: 1px; background: var(--border); margin: 12px 0; }
+
+        .nav-item.has-children { justify-content: space-between; }
+        .nav-item.has-children .chevron { 
+            margin-left: auto; width: 16px; height: 16px; transition: transform .2s; 
+        }
+        .sub-menu { 
+            list-style: none; margin-top: 5px; margin-left: 15px; display: none; flex-direction: column; gap: 6px; 
+        }
+        .sub-menu a { 
+            display: flex; align-items: center; gap: 10px; font-size: .85rem; padding: 8px; border-radius: var(--radius); 
+            color: var(--text-muted); padding-left: 20px;
+        }
+        .sub-menu a.active { 
+            background: var(--active); color: var(--text-dark); font-weight: 600;
+        }
+        .sub-menu a:hover { 
+            background: var(--hover); color: var(--text); 
+        }
+        .nav-item.open + .sub-menu { display: flex; }
+        .nav-item.open .chevron { transform: rotate(90deg); }
+        .logout { color: #d03d37 !important; }
+        .logout:hover { background: #ffe5e5; }
+        .sidebar-nav a.muted-list-item {
+            color: var(--text-dark); 
+            border: 1px solid var(--border, #e5e5e5); 
+            padding: 7px 10px; 
+            background-color: #f8f8f8; 
+        }
+        .sidebar-nav a.muted-list-item:hover:not(.active) {
+            background-color: #e8e8e8; 
+            color: var(--text-dark); 
+            border-color: #c0c0c0; 
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-container{
+            flex:1; 
+            display:flex; 
+            flex-direction:column; 
+            background-color:var(--background-page); 
+            overflow-y:auto; /* Allow the main content area to scroll */
+        }
+        header.top-header{
+            background-color:var(--background-card); 
+            padding:15px 20px; 
+            box-shadow:0 1px 4px rgba(0,0,0,0.05); 
+            display:flex; 
+            justify-content:space-between; 
+            align-items:center;
+            flex-shrink: 0; /* Prevents header from shrinking */
+        }
+        .header-title{font-size:1.3rem; font-weight:600;}
+        .user-profile{display:flex; align-items:center; gap:10px;}
+        .user-profile img{border-radius:50%; width:35px; height:35px; object-fit:cover;}
+
+        /* --- DASHBOARD SPECIFIC STYLES --- */
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* Four equal columns */
+            gap: 20px;
+            padding: 20px 20px 0 20px;
+            flex-shrink: 0;
+        }
+
+        .kpi-card {
+            background-color: var(--background-card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 120px;
+            border: 1px solid var(--border);
+        }
+
+        .kpi-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .kpi-footer {
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .trend-up { color: var(--color-published); font-weight: 600; margin-right: 5px; }
+        .trend-down { color: var(--color-danger); font-weight: 600; margin-right: 5px; }
+        
+        /* Dashboard Charts/Tables Grid */
+        .dashboard-content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Two columns: 2/3 width for main chart, 1/3 for side stats */
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .card-panel {
+            background-color: var(--background-card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 15px;
+        }
+
+        /* Mock Chart Styling */
+        .mock-chart {
+            background-color: var(--chart-bg);
+            height: 250px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-style: italic;
+            border: 1px dashed var(--border);
+            margin-bottom: 10px;
+        }
+        
+        /* Tables in Dashboard */
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .mini-table th, .mini-table td {
+            padding: 10px 0;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .mini-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .mini-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .stock-alert {
+            font-weight: 600;
+        }
+        .stock-low { color: var(--color-danger); }
+        .stock-medium { color: var(--color-warning); }
+
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">Tropicart</div>
+
+    <nav class="sidebar-nav">
+        <ul class="nav-section">
+            <li><a class="nav-item active" href="#"><i data-feather="bar-chart-2"></i> Dashboard</a></li>
+           </ul>
+
+        <ul class="nav-section">
+            <li>
+                <button class="nav-item has-children open" id="managementDropdown">
+                    <i data-feather="grid"></i>
+                    <span>Management</span>
+                    <i class="chevron" data-feather="chevron-right"></i>
+                </button>
+
+                <ul class="sub-menu" id="managementSubMenu" style="display: flex;">
+                    <li><a href="admin_addproduct.html"><i data-feather="box"></i> Product List</a></li> 
+                    <li><a href="admin_orderlist.html" class="muted-list-item" data-page="order-list"><i data-feather="shopping-bag"></i> Order List</a></li>
+                    <li><a href="#"><i data-feather="user"></i> Customer List</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul class="nav-section">
+            <li><a class="nav-item" href="#"><i data-feather="file-text"></i> Reports</a></li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul class="nav-section">
+            <li><a class="nav-item" href="#"><i data-feather="settings"></i> Settings</a></li>
+            <li><a class="nav-item" href="#"><i data-feather="bell"></i> Notifications</a></li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul class="nav-section">
+            <li><a class="nav-item logout" href="#"><i data-feather="log-out"></i> Log Out</a></li>
+        </ul>
+
+    </nav>
+</aside>
+
+
+<div class="main-container">
+    <header class="top-header">
+        <h1 class="header-title">Admin Dashboard</h1>
+        <div class="user-profile">
+            <span>Admin User</span>
+            <img src="https://via.placeholder.com/40x40/00796b/ffffff?text=AU" alt="User Avatar">
+        </div>
+    </header>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <span class="kpi-title">Net Revenue (30 Days)</span>
+            <span class="kpi-value">₱855,120.50</span>
+            <div class="kpi-footer">
+                <span class="trend-up"><i data-feather="arrow-up" style="width: 12px; height: 12px;"></i> 12.5%</span> vs. previous period
+            </div>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-title">Total Orders (30 Days)</span>
+            <span class="kpi-value">1,845</span>
+            <div class="kpi-footer">
+                <span class="trend-up"><i data-feather="arrow-up" style="width: 12px; height: 12px;"></i> 5.1%</span> vs. previous period
+            </div>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-title">Avg. Order Value (AOV)</span>
+            <span class="kpi-value">₱463.48</span>
+            <div class="kpi-footer">
+                <span class="trend-up"><i data-feather="arrow-up" style="width: 12px; height: 12px;"></i> 7.0%</span> vs. previous period
+            </div>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-title">New Customers</span>
+            <span class="kpi-value">1,200</span>
+            <div class="kpi-footer">
+                <span class="trend-down" style="color: #6c6c6c;"><i data-feather="users" style="width: 12px; height: 12px;"></i> 35% Returning Rate</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-content-grid">
+        
+        <div class="left-column">
+            
+            <div class="card-panel">
+                <div class="panel-header">Revenue Trend (Last 30 Days)</div>
+                <div class="mock-chart">
+                    Placeholder for Line Chart (e.g., using Chart.js)<br>
+                   
+                </div>
+            </div>
+
+            <div class="card-panel" style="margin-top: 20px;">
+                <div class="panel-header">Top 5 Bestselling Products</div>
+                <table class="mini-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product Name</th>
+                            <th>Units Sold</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Premium Mangoes (3kg)</td><td>2,150</td><td>₱215,000</td></tr>
+                        <tr><td>2</td><td>Ube Halaya Gourmet Jar</td><td>1,890</td><td>₱141,750</td></tr>
+                        <tr><td>3</td><td>Dried Banana Chips (Large)</td><td>1,500</td><td>₱75,000</td></tr>
+                        <tr><td>4</td><td>Fresh Coconut Water (1L)</td><td>1,220</td><td>₱61,000</td></tr>
+                        <tr><td>5</td><td>Calamansi Concentrate (500ml)</td><td>980</td><td>₱53,900</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="right-column">
+            
+            <div class="card-panel">
+                <div class="panel-header">Inventory Alerts</div>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 10px;">
+                        <span class="stock-alert stock-low">Fresh Coconut Water (1L):</span> <br>
+                        <span style="font-size: 0.85rem;">**45 units left** - Re-order required!</span>
+                    </li>
+                    <li style="margin-bottom: 10px;">
+                        <span class="stock-alert stock-low">Durian Chips (300g):</span> <br>
+                        <span style="font-size: 0.85rem;">**0 units left** - Out of Stock.</span>
+                    </li>
+                    <li style="margin-bottom: 10px;">
+                        <span class="stock-alert stock-medium">Premium Mangoes (3kg):</span> <br>
+                        <span style="font-size: 0.85rem;">**250 units left** - Check supplier lead time.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card-panel" style="margin-top: 20px;">
+                <div class="panel-header">Revenue by Channel</div>
+                <div class="mock-chart" style="height: 150px;">
+                    Placeholder for Donut Chart<br>
+                    60% Online Store, 25% Shopee/Lazada, 15% Other.
+                </div>
+                <table class="mini-table" style="margin-top: 10px;">
+                    <tbody>
+                        <tr><td>Online Store</td><td>60%</td></tr>
+                        <tr><td>Shopee/Lazada</td><td>25%</td></tr>
+                        <tr><td>Facebook/IG</td><td>15%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // Initialize feather icons for the entire page
+    feather.replace(); 
+
+    // Sidebar Dropdown Toggle Logic (Identical to Order List)
+    const managementDropdown = document.getElementById('managementDropdown');
+    const managementSubMenu = document.getElementById('managementSubMenu');
+    
+    managementDropdown.addEventListener('click', () => {
+        managementDropdown.classList.toggle('open');
+    });
+
+    // Ensure the 'Dashboard' link is the active one on this page
+    // The active class is set in the HTML markup.
+</script>
+
+</body>
+</html>

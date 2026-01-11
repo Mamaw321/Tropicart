@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tropicart - Products</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/feather-icons"></script>
+
+<style>
+/* =========================================
+   1. COLORS & BASE (Refined UI)
+========================================= */
+:root {
+    --primary-color: #febaba; 
+    --primary-dark: #e59a9a;
+    --primary-light: #fff0f0;
+    --text-dark: #2a3342;
+    --text-muted: #8898aa;
+    --background-light: #f4f7f6;
+    --white: #ffffff;
+    --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+    --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --border-radius: 16px;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: var(--background-light);
+    color: var(--text-dark);
+    overflow-x: hidden;
+}
+
+a { text-decoration: none; color: inherit; transition: all 0.2s; }
+
+/* =========================================
+   2. HEADER / NAVBAR (Centered Links)
+========================================= */
+header {
+    width: 100%;
+    padding: 15px 0;
+    background: var(--white);
+    box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    /* This setup allows the middle section to be centered */
+}
+
+.logo { 
+    font-size: 24px; 
+    font-weight: 800; 
+    color: var(--primary-dark); 
+    letter-spacing: -0.5px;
+    flex: 1; /* Takes up left space */
+}
+
+nav {
+    flex: 2; /* Takes up center space */
+    display: flex;
+    justify-content: center;
+}
+
+nav ul { 
+    display: flex; 
+    list-style: none; 
+    gap: 40px; 
+    padding: 0; 
+    margin: 0; 
+}
+
+nav ul li a { 
+    font-weight: 500; 
+    color: var(--text-dark); 
+    font-size: 15px;
+    position: relative;
+}
+
+nav ul li a:hover { color: var(--primary-dark); }
+
+/* Animated underline for links */
+nav ul li a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    left: 0;
+    background-color: var(--primary-dark);
+    transition: width 0.3s;
+}
+nav ul li a:hover::after { width: 100%; }
+
+.nav-icons { 
+    flex: 1; /* Takes up right space */
+    display: flex; 
+    gap: 20px; 
+    justify-content: flex-end;
+    align-items: center; 
+    color: var(--text-dark); 
+}
+
+.nav-icons i { 
+    width: 22px; 
+    height: 22px; 
+    cursor: pointer; 
+    transition: transform 0.2s;
+}
+.nav-icons i:hover { transform: scale(1.1); color: var(--primary-dark); }
+
+/* Cart Badge */
+.cart-icon-wrapper { position: relative; cursor: pointer; display: flex; align-items: center; }
+#cart-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--primary-dark);
+    color: #fff;
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+#logoutBtn {
+    padding: 8px 16px;
+    border: 1px solid var(--primary-dark);
+    color: var(--primary-dark);
+    border-radius: 8px;
+    background: transparent;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.3s;
+}
+#logoutBtn:hover {
+    background: var(--primary-dark);
+    color: white;
+}
+
+/* =========================================
+   3. HERO SECTION
+========================================= */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.page-header {
+    text-align: center;
+    padding: 90px 20px;
+    border-radius: 24px;
+    margin: 40px 0;
+    background-image: url('uploads/herobannerfinal.png'); 
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    color: #ffffff;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.35); /* Darker overlay for text pop */
+    z-index: 0;
+}
+
+.page-header * { position: relative; z-index: 1; }
+
+.page-header h3 { 
+    color: var(--primary-color); 
+    font-size: 13px; 
+    letter-spacing: 2px; 
+    text-transform: uppercase; 
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.page-header h1 { 
+    font-size: 48px; 
+    margin: 0 0 15px; 
+    font-weight: 800; 
+}
+
+/* =========================================
+   4. FILTERS
+========================================= */
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 50px;
+    background: var(--white);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover { background: #fff5f5; color: var(--text-dark); }
+
+.filter-btn.active {
+    background: var(--primary-color);
+    color: var(--text-dark);
+    box-shadow: 0 4px 12px rgba(254, 186, 186, 0.5);
+}
+
+#sortSelect {
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 1px solid #eee;
+    background-color: var(--white);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text-dark);
+    cursor: pointer;
+    outline: none;
+}
+
+/* =========================================
+   5. PRODUCT CARDS (New Design)
+========================================= */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 30px;
+    margin-bottom: 100px;
+}
+
+.product-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* Image Area */
+.product-image-container {
+    width: 100%;
+    height: 240px;
+    border-radius: 15px;
+    overflow: hidden;
+    background: #fafafa;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover img {
+    transform: scale(1.08);
+}
+
+/* Card Content */
+.product-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 5px;
+}
+
+.product-card h4 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-dark);
+    max-width: 80%;
+    line-height: 1.4;
+}
+
+/* Eye Icon Button */
+.view-details-btn {
+    background: var(--primary-light);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-dark);
+    transition: all 0.2s;
+    border: none;
+}
+
+.view-details-btn:hover {
+    background: var(--primary-dark);
+    color: white;
+}
+
+.view-details-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+.product-card .price {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+    display: block;
+}
+
+/* Add Button */
+.product-card .add-btn {
+    background: var(--text-dark);
+    color: var(--white);
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.product-card .add-btn:hover {
+    background: var(--primary-color);
+    color: var(--text-dark);
+}
+
+/* =========================================
+   6. CART MODAL
+========================================= */
+.cart-modal {
+    position: fixed;
+    top: 0;
+    right: -450px;
+    width: 400px;
+    height: 100vh;
+    background: var(--white);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+    transition: right .4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-modal.open { right: 0; }
+
+.cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.cart-header h3 { margin: 0; font-size: 20px; font-weight: 700; }
+
+.close-cart {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+.cart-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #fdfdfd;
+}
+
+.cart-item {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    border: 1px solid #f5f5f5;
+}
+
+.cart-item img {
+    width: 65px;
+    height: 65px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.cart-item-details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+.cart-item-name { 
+    font-weight: 600; 
+    font-size: 14px; 
+    margin-bottom: 4px; 
+}
+
+.cart-item-price { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+
+.qty-controls { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    background: #f0f2f5;
+    width: fit-content;
+    border-radius: 8px;
+    padding: 3px 5px;
+}
+
+.qty-controls button { 
+    width: 22px; height: 22px; 
+    border-radius: 4px; border: none; 
+    background: var(--white); 
+    color: var(--text-dark); 
+    font-size: 12px; cursor: pointer; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.qty-controls span { min-width: 15px; text-align: center; font-size: 13px; font-weight: 600; }
+
+.remove-btn { color: #ff6b6b; background: none; border: none; cursor: pointer; }
+
+.cart-total {
+    font-size: 20px; font-weight: 700; padding: 20px 25px;
+    background: var(--white); border-top: 1px solid #f0f0f0;
+    display: flex; justify-content: space-between;
+}
+
+.cart-footer { padding: 0 25px 25px 25px; background: var(--white); }
+
+.checkout-btn {
+    width: 100%;
+    background: var(--text-dark);
+    color: var(--white);
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s;
+}
+.checkout-btn:hover { background: var(--primary-dark); }
+
+/* Mobile */
+@media (max-width: 768px) {
+    nav { display: none; } /* Hide nav on mobile for now */
+    .product-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .cart-modal { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="navbar-container">
+        <div class="logo">Tropicart</div>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#" style="color:var(--primary-dark)">Products</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="nav-icons">
+            <i data-feather="bell"></i>
+            <div class="cart-icon-wrapper" onclick="openCart()">
+                <i data-feather="shopping-cart"></i>
+                <span id="cart-count">0</span>
+            </div>
+            <div id="welcomeUser" style="font-weight:600; font-size:14px;"></div>
+            <button id="logoutBtn">Logout</button>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="page-header">
+        <h3>TRENDING PRODUCT</h3>
+        <h1>Our Fresh Drinks</h1>
+        <p>Discover the freshest fruits, amjs dx.n sxdknsxkns, and smjn sourced directly from local growers.</p>
+    </div>
+
+    <div class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="fruit">Best Seller</button>
+        <button class="filter-btn" data-filter="vegetable">Featured Products</button>
+        <button class="filter-btn" data-filter="salad">New Products</button>
+        <select id="sortSelect">
+            <option value="default">Sort By</option>
+            <option value="price_low">Price: Low to High</option>
+            <option value="price_high">Price: High to Low</option>
+        </select>
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+</div>
+
+<div id="cartModal" class="cart-modal">
+    <div class="cart-header">
+        <h3>Your Cart</h3>
+        <button class="close-cart" onclick="closeCart()">✕</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-total">
+        <span>Total:</span>
+        <span id="cartTotal">₱0.00</span>
+    </div>
+    <div class="cart-footer">
+        <button id="checkoutButton" class="checkout-btn">Proceed To Checkout</button>
+    </div>
+</div>
+
+<script>
+/* ===========================
+   Full product + cart JS
+   FUNCTIONS REMAIN UNCHANGED
+=========================== */
+
+(() => {
+  const PRODUCT_POLL_INTERVAL_MS = 15000;
+  const productEndpoint = 'user_fetch_products.php';
+  const fetchCartEndpoint = 'fetch_user_cart.php';
+  const addToCartEndpoint = 'add_to_cart.php';
+  const sessionCheckEndpoint = 'session_check.php';
+  const logoutEndpoint = 'logout.php';
+
+  let products = [];
+  let cart = [];
+
+  function q(id){ return document.getElementById(id); }
+
+  async function fetchUsername() {
+    try {
+      const res = await fetch(sessionCheckEndpoint);
+      const data = await res.json();
+      if (data.loggedIn) q('welcomeUser').textContent = "Hi, " + data.username;
+      else q('welcomeUser').textContent = "";
+    } catch (err) { console.error("fetchUsername error:", err); }
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    try { await fetch(logoutEndpoint); window.location.href = 'login.html'; } 
+    catch (err) { console.error("Logout failed:", err); }
+  });
+
+  async function loadProducts() {
+    try {
+      const res = await fetch(productEndpoint);
+      const data = await res.json();
+      products = Array.isArray(data) ? data : [];
+      renderProducts();
+    } catch (err) { console.error("Error loading products:", err); }
+  }
+
+  // --- MODIFIED RENDER FUNCTION FOR UI ONLY ---
+  function renderProducts() {
+    const grid = q('productGrid');
+    grid.innerHTML = '';
+
+    products.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.dataset.category = (p.description || '').toLowerCase() || 'all';
+      card.dataset.productId = p.product_id;
+
+      // New UI Structure for Card
+      card.innerHTML = `
+        <div class="product-image-container">
+            <img src="${p.image}" alt="${escapeHtml(p.name)}">
+        </div>
+        
+        <div class="product-info-row">
+            <h4>${escapeHtml(p.name)}</h4>
+            <a href="user_product_details.html?product_id=${p.product_id}" class="view-details-btn" title="View Details">
+                <i data-feather="eye"></i>
+            </a>
+        </div>
+
+        <div class="price">₱${parseFloat(p.price).toFixed(2)}</div>
+        
+        <button class="add-btn">
+            Add to Cart <i data-feather="shopping-cart" style="width:16px; height:16px;"></i>
+        </button>
+      `;
+
+      grid.appendChild(card);
+
+      const btn = card.querySelector('.add-btn');
+      btn.addEventListener('click', ev => {
+        ev.stopPropagation();
+        addToCart({ id: p.product_id, name: p.name, price: parseFloat(p.price), image: p.image });
+      });
+
+      // Clicking the whole card also goes to details, but the eye icon is explicit now
+      card.addEventListener('click', (e) => {
+        // Prevent redirect if clicking add button or eye icon (since eye icon has its own href)
+        if (!e.target.closest('.add-btn') && !e.target.closest('.view-details-btn')) {
+             window.location.href = `user_product_details.html?product_id=${p.product_id}`;
+        }
+      });
+    });
+    feather.replace(); 
+  }
+
+  function escapeHtml(s){
+    if (!s) return '';
+    return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const current = document.querySelector('.filter-btn.active');
+      if (current) current.classList.remove('active');
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.style.display = (filter === 'all' || card.dataset.category === filter) ? 'flex' : 'none';
+      });
+    });
+  });
+
+  q('sortSelect').addEventListener('change', function(){
+    const val = this.value;
+    const grid = q('productGrid');
+    const cards = Array.from(grid.children);
+    if (val === 'price_low') {
+      cards.sort((a,b) => parseFloat(a.querySelector('.price').innerText.replace('₱','')) - parseFloat(b.querySelector('.price').innerText.replace('₱','')));
+    } else if (val === 'price_high') {
+      cards.sort((a,b) => parseFloat(b.querySelector('.price').innerText.replace('₱','')) - parseFloat(a.querySelector('.price').innerText.replace('₱','')));
+    }
+    grid.innerHTML = '';
+    cards.forEach(c => grid.appendChild(c));
+  });
+
+  document.getElementById("checkoutButton").addEventListener("click", () => {
+    if (cart.length === 0) { alert("Your cart is empty!"); return; }
+    closeCart();
+    window.location.href = "user_checkout_page.html";
+  });
+
+  async function loadUserCart() {
+    try {
+      const res = await fetch(fetchCartEndpoint);
+      const data = await res.json();
+      const items = data.cart || (data.success && data.cart) || [];
+      cart = items.map(item => ({
+        id: parseInt(item.product_id),
+        name: item.name,
+        price: parseFloat(item.price_at_time ?? item.price ?? 0),
+        image: item.image,
+        qty: parseInt(item.quantity)
+      }));
+      updateCartCount();
+      renderCart();
+      updateCartTotal();
+    } catch (err) { console.error("Failed to load cart:", err); }
+  }
+
+  async function addToCart(product) {
+    const existing = cart.find(i => i.id === product.id);
+    if (existing) {
+      existing.qty += 1;
+      await updateCartDB(product.id, existing.qty);
+    } else {
+      cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, qty: 1 });
+      await updateCartDB(product.id, 1);
+    }
+    updateCartCount();
+    renderCart();
+    updateCartTotal();
+    await loadUserCart();
+  }
+
+  async function updateQty(id, change) {
+    const item = cart.find(i => i.id === id);
+    if (!item) return;
+    item.qty += change;
+    if (item.qty <= 0) {
+      await updateCartDB(id, 0);
+      cart = cart.filter(i => i.id !== id);
+    } else {
+      await updateCartDB(id, item.qty);
+    }
+    updateCartCount();
+    renderCart();
+    updateCartTotal();
+    await loadUserCart();
+  }
+
+  async function removeItem(id) {
+    cart = cart.filter(i => i.id !== id);
+    await updateCartDB(id, 0);
+    updateCartCount();
+    renderCart();
+    updateCartTotal();
+    await loadUserCart();
+  }
+
+  async function updateCartDB(product_id, quantity) {
+    try {
+      const res = await fetch(addToCartEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id, quantity })
+      });
+      const data = await res.json();
+      if (!data.success) { console.warn("Server cart update:", data.message || data); }
+    } catch (err) { console.error("Error syncing cart with DB:", err); }
+  }
+
+  function renderCart() {
+    const container = q('cartItems');
+    container.innerHTML = '';
+    if (!cart.length) {
+      container.innerHTML = `<div style="padding:20px;color:#777;text-align:center;">Your cart is empty.</div>`;
+      return;
+    }
+    cart.forEach(item => {
+      container.innerHTML += `
+        <div class="cart-item">
+          <img src="${item.image}">
+          <div class="cart-item-details">
+            <div class="cart-item-name">${escapeHtml(item.name)}</div>
+            <div class="cart-item-price">₱${(item.price * item.qty).toFixed(2)}</div>
+            <div class="qty-controls">
+              <button onclick="updateQty(${item.id}, -1)">−</button>
+              <span>${item.qty}</span>
+              <button onclick="updateQty(${item.id}, 1)">+</button>
+            </div>
+          </div>
+          <button class="remove-btn" onclick="removeItem(${item.id})"><i data-feather="trash-2" style="width:18px;height:18px;"></i></button>
+        </div>
+      `;
+    });
+    feather.replace();
+  }
+
+  function updateCartCount() { q('cart-count').innerText = cart.reduce((t, i) => t + i.qty, 0); }
+  function updateCartTotal() {
+    const total = cart.reduce((s, it) => s + it.price * it.qty, 0);
+    q('cartTotal').innerText = "₱" + total.toFixed(2);
+  }
+
+  window.openCart = function(){ q('cartModal').classList.add('open'); }
+  window.closeCart = function(){ q('cartModal').classList.remove('open'); }
+
+  async function init() {
+    await fetchUsername();
+    await loadProducts();
+    await loadUserCart();
+  }
+
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible') {
+      await loadProducts();
+      await loadUserCart();
+    }
+  });
+
+  if (PRODUCT_POLL_INTERVAL_MS) {
+    setInterval(async () => { await loadProducts(); }, PRODUCT_POLL_INTERVAL_MS);
+  }
+
+  window.addToCart = addToCart;
+  window.updateQty = updateQty;
+  window.removeItem = removeItem;
+
+  document.addEventListener('DOMContentLoaded', init);
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1099 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tropicart Admin - Product Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+<style>
+/* ——— GENERAL ——— */
+:root {
+    --sidebar-bg: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #6c6c6c;
+    --hover: #f4f4f4;
+    --active: #eaeaea;
+    --border: #e5e5e5;
+    --radius: 10px;
+    --transition: .2s ease;
+
+    /* New/Updated colors for the modal design based on screenshot */
+    --modal-backdrop: rgba(0, 0, 0, 0.4);
+    --modal-background: #F8F9FA; /* Off-white background for the modal */
+    --modal-card-bg: #FFFFFF;
+    --modal-border: #E0E0E0;
+    --modal-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    --primary-blue: #007bff; /* Example primary blue for buttons/active states */
+    --secondary-gray: #6c757d; /* Example secondary gray */
+
+    /* Original root definitions (kept for main dashboard) */
+    --primary-color:#333;
+    --accent-color:#555;
+    --background-page:#eeeeee;
+    --background-sidebar:#ffffff;
+    --background-card:#ffffff;
+    --text-dark:#222;
+    /* Redefine text-muted for global use */
+    --text-muted: #6c6c6c;
+    --color-published:#4caf50;
+    --color-danger:#d32f2f;
+}
+
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif;}
+body {background-color:var(--background-page); color:var(--text-dark); display:flex; height:100vh;}
+a {text-decoration:none; color:inherit;}
+
+/* --- SIDEBAR --- */
+aside.sidebar{
+    width:219px;
+    background-color:var(--background-sidebar);
+    padding:20px;
+    box-shadow:2px 0 10px rgba(0,0,0,0.05);
+    overflow-y:auto;
+}
+.sidebar-logo{font-size:1.3rem; font-weight:700; color:var(--primary-color); margin-bottom:30px;}
+.sidebar-nav ul{list-style:none; display:flex; flex-direction:column; gap:8px;}
+
+/* General style for all links and buttons */
+.sidebar-nav a, .sidebar-nav button.nav-item { /* Added button.nav-item here */
+    display:flex; align-items:center; padding:10px; border-radius:10px;
+    color:var(--text-muted); transition:background 0.2s, color 0.2s;
+    /* Styles for the button element */
+    background: none; 
+    border: none; 
+    width: 100%; 
+    text-align: left;
+    cursor: pointer;
+}
+
+/* Common Hover State */
+.sidebar-nav a:hover:not(.active), .sidebar-nav button.nav-item:hover:not(.active){
+    background-color:#f0f0f0; 
+    color:var(--text-dark);
+}
+
+/* Active State for single links (like Dashboard) */
+.sidebar-nav a.active{
+    background-color:#e0e0e0; 
+    color:var(--primary-color); 
+    font-weight:600;
+}
+
+/* Active State for parent item (like Management) */
+.sidebar-nav button.nav-item.open{
+    background-color:#e0e0e0; 
+    color:var(--primary-color); 
+    font-weight:600;
+}
+
+.sidebar-nav a svg, .sidebar-nav button.nav-item svg {width:18px; height:18px; margin-right:10px;}
+.divider { width: 100%; height: 1px; background: var(--border); margin: 12px 0; }
+
+/* Dropdown/Sub-menu styles */
+.nav-item.has-children { justify-content: space-between; }
+.nav-item.has-children .chevron { 
+    margin-left: auto; 
+    width: 16px; 
+    height: 16px; 
+    transition: transform .2s; 
+}
+.sub-menu { 
+    list-style: none; 
+    margin-top: 5px; 
+    margin-left: 15px; 
+    display: none; 
+    flex-direction: column; 
+    gap: 6px; 
+}
+.sub-menu a { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    font-size: .85rem; 
+    padding: 8px; 
+    border-radius: var(--radius); 
+    color: var(--text-muted); 
+    padding-left: 20px; /* Add padding to push it away from the edge */
+}
+.sub-menu a.active { /* Style for the active sub-menu item (e.g., Product List) */
+    background: var(--active); 
+    color: var(--text-dark); 
+    font-weight: 600;
+}
+.sub-menu a:hover { 
+    background: var(--hover); 
+    color: var(--text); 
+}
+
+/* The state that opens the sub-menu */
+.nav-item.open + .sub-menu { display: flex; }
+.nav-item.open .chevron { transform: rotate(90deg); }
+
+.logout { color: #d03d37 !important; }
+.logout:hover { background: #ffe5e5; }
+
+
+/* --- MAIN CONTENT --- */
+.main-container{flex:1; display:flex; flex-direction:column; background-color:var(--background-page); overflow-y:hidden;}
+header.top-header{background-color:var(--background-card); padding:15px 20px; box-shadow:0 1px 4px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center;}
+.header-title{font-size:1.3rem; font-weight:600;}
+.user-profile{display:flex; align-items:center; gap:10px;}
+.user-profile img{border-radius:50%; width:35px; height:35px; object-fit:cover;}
+
+.stats-container{display:flex; background-color:var(--background-card); border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin:15px;}
+.stat-card{flex:1; display:flex; align-items:center; justify-content:center; gap:10px; padding:12px 15px; font-weight:600; color:var(--text-dark); position:relative;}
+.stat-card:not(:last-child)::after{content:""; position:absolute; right:0; top:10%; width:1px; height:80%; background-color:var(--border-color);}
+.stat-content{display:flex; flex-direction:column;}
+.stat-value{font-size:1.5rem; font-weight:700;}
+.stat-label{font-size:0.8rem; color:var(--text-muted);}
+.text-danger{color:var(--color-danger);}
+
+.listing-section{
+    background-color:var(--background-card); border-radius:12px; padding:12px; margin:0 15px 15px 15px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.05); flex:1; display:flex; flex-direction:column;
+}
+.inventory-controls{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:8px;}
+
+.controls-right{
+    display:flex; 
+    gap:10px; 
+    align-items:center;
+}
+.btn-new-product{
+    padding:6px 12px; display:flex; align-items:center; gap:5px;
+    background-color:var(--primary-color); color:#fff; border:none; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;
+}
+.btn-new-product:hover{background-color:var(--accent-color);}
+.btn-new-product i{width:14px;height:14px;}
+.search-filter-area input, .search-filter-area select{
+    padding:5px 8px; 
+    border-radius:8px; 
+    border:1px solid var(--border); 
+    font-size:0.75rem; 
+    height:30px;
+    width: auto; 
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); 
+    transition: all 0.2s ease; 
+}
+
+.table-scroll{overflow-x:hidden;}
+
+/* --- MODIFIED TABLE STYLES --- */
+.product-table{
+    width:100%; border-collapse:separate; border-spacing:0 3px; font-size:1rem; text-align:left;
+}
+.product-table thead{background-color:var(--background-card);}
+.product-table th, .product-table td{padding:6px 8px; vertical-align:middle; border-bottom:1px solid var(--border-color);}
+
+/* ADD THESE NEW LINES FOR ZEBRA STRIPING */
+.product-table tbody tr:nth-child(odd) {
+    background-color: #f8f8f8; /* Light Gray */
+}
+
+.product-table tbody tr:nth-child(even) {
+    background-color: #ffffff; /* White */
+}
+/* Optional: Improve hover effect */
+.product-table tbody tr:hover {
+    background-color: #e6e6e6; /* Medium Gray on hover */
+}
+/* --- NEW/MODIFIED STYLES FOR COLUMN WIDTHS --- */
+.product-table thead th:nth-child(1), /* ID */
+.product-table tbody td:nth-child(1) {
+    width: 50px; 
+    text-align: center;
+}
+
+.product-table thead th:nth-child(2), /* Product */
+.product-table tbody td:nth-child(2) {
+    width: 20%; 
+    min-width: 150px; 
+}
+
+.product-table thead th:nth-child(3), /* Description */
+.product-table tbody td:nth-child(3) {
+    width: 35%; 
+}
+
+.product-table thead th:nth-child(4), /* Price */
+.product-table tbody td:nth-child(4) {
+    width: 80px; 
+}
+
+.product-table thead th:nth-child(5), /* Stock */
+.product-table tbody td:nth-child(5) {
+    width: 70px; 
+    text-align: center;
+}
+
+.product-table thead th:nth-child(6), /* Publish */
+.product-table tbody td:nth-child(6) {
+    width: 80px; 
+    text-align: center;
+}
+
+.product-table thead th:nth-child(7), /* Actions */
+.product-table tbody td:nth-child(7) {
+    width: 80px; 
+}
+/* --- END NEW/MODIFIED STYLES --- */
+
+.product-name{display:flex; align-items:center; justify-content: flex-start}
+.product-name img{width:30px; height:30px; object-fit:cover; border-radius:4px; margin-right:6px; border:1px solid var(--border-color);}
+.short-desc{max-width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.action-buttons{display:flex; gap:4px; flex-shrink:0;}
+.action-buttons button{width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border-color); border-radius:5px; cursor:pointer; background:#fff; transition:0.2s;}
+.action-buttons button:hover{background:#f0f0f0; border-color:#c0c0c0;}
+.action-buttons button svg{width:12px;height:12px;}
+
+.switch{position:relative; display:inline-block; width:36px; height:18px;}
+.switch input{opacity:0; width:0; height:0;}
+.slider{position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:18px;}
+.slider:before{position:absolute; content:""; height:14px; width:14px; left:2px; bottom:2px; background-color:white; border-radius:50%; transition:.4s;}
+input:checked + .slider{background-color:var(--color-published);}
+input:checked + .slider:before{transform:translateX(18px);}
+
+.pagination-buttons button{font-size:0.7rem; padding:4px 8px; border-radius:5px;}
+.pagination-buttons button:disabled{opacity:0.5; cursor:not-allowed;}
+.pagination-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+}
+.pagination-numbers button {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.pagination-numbers button.active {
+    background-color: var(--primary-color);
+    color: #fff;
+    font-weight: 600;
+}
+.pagination-numbers button:hover:not(.active) {
+    background-color: var(--background-card);
+}
+.inventory-footer {
+    display: flex;
+    justify-content: flex-end; /* aligns to the right */
+    margin-top: auto;        /* push to bottom inside flex container */
+}
+.listing-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* allow footer to stick to bottom */
+}
+
+
+/* --- MODAL SPECIFIC STYLES (MATCHING SCREENSHOT) --- */
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--modal-backdrop);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--modal-background); /* Overall modal background */
+    border-radius: 12px; 
+    width: 90%;
+    max-width: 1100px; /* Wider to accommodate side-by-side cards */
+    height: 90vh; /* Fixed height to avoid scrolling issues */
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--modal-shadow);
+    overflow: hidden; 
+    border: 1px solid var(--modal-border);
+    padding: 0;
+}
+
+/* Modal Header: Title and Action Buttons */
+.modal-header-design {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    padding: 25px 30px; 
+    border-bottom: 1px solid var(--modal-border);
+    background-color: var(--modal-card-bg); 
+    flex-shrink: 0; 
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.modal-header-design h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+}
+.modal-header-design p.subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+.modal-header-actions {
+    display: flex;
+    gap: 10px; 
+}
+
+/* Modal Action Buttons (Cancel/Save) */
+.btn-cancel, .btn-submit {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    line-height: 1.5; 
+}
+
+.btn-cancel {
+    background-color: transparent;
+    border: 1px solid var(--modal-border);
+    color: var(--text-muted);
+}
+.btn-cancel:hover {
+    background-color: #f0f0f0;
+    color: var(--text-dark);
+}
+
+.btn-submit {
+    background-color: var(--primary-color); 
+    border: 1px solid var(--primary-color);
+    color: #fff;
+}
+.btn-submit:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+
+/* Modal Form Grid Layout */
+#productForm {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden; 
+}
+
+.modal-form-grid {
+    display: grid;
+    /* Adjusted grid: thinner left column (35%), wider right column (65%) */
+    grid-template-columns: 0.7fr 1.3fr; 
+    gap: 25px; 
+    padding: 25px 30px; 
+    overflow-y: auto; 
+    flex-grow: 1; 
+}
+
+/* Columns */
+.left-column, .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; 
+}
+
+/* Individual Cards */
+.card-design {
+    background-color: var(--modal-card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--modal-shadow);
+    border: 1px solid var(--modal-border);
+}
+
+.card-design h4 {
+    font-size: 1rem; 
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    padding-bottom: 0; 
+    border-bottom: none; 
+}
+
+.card-design .card-description {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: -10px; 
+    margin-bottom: 15px;
+}
+
+/* Form Group overrides for new design */
+.form-group {
+    margin-bottom: 15px; 
+}
+.form-group:last-child {
+    margin-bottom: 0; 
+}
+
+.form-group label {
+    font-size: 0.82rem; 
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Input/Select/Textarea styling */
+.form-group input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    height: 40px; 
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 0.9rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #ffffff;
+}
+.form-group textarea {
+    min-height: 100px; 
+    resize: vertical; 
+}
+
+.form-group input:focus:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: var(--primary-blue); 
+    box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.25); 
+    outline: none;
+}
+
+/* File Input Styling */
+.form-group input[type="file"] {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #f7f7f7;
+    height: auto; 
+    padding: 10px;
+}
+.section-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 8px;
+}
+
+/* Thumbnail Image Display */
+.uploaded-thumbnail {
+    width: 100%;
+    max-width: 250px; 
+    height: 180px; 
+    object-fit: cover;
+    margin: 0 auto 15px auto; 
+    display: block;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background-color: #f3f4f6; 
+}
+
+/* Status Select */
+.status-select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+/* This dot is a visual cue for the 'Published' status */
+.status-select-wrapper select[value="1"] + .status-dot {
+    background-color: var(--color-published);
+}
+.status-select-wrapper select[value="0"] + .status-dot {
+    background-color: var(--color-danger); /* Draft color */
+}
+.status-select-wrapper::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-published); 
+    border-radius: 50%;
+    position: absolute;
+    left: 12px; 
+    z-index: 2;
+}
+.status-select-wrapper select {
+    padding-left: 28px; 
+}
+
+/* Placeholder styles (Rich text editor, if implemented later) */
+.rich-text-toolbar {
+    display: flex;
+    background-color: #f5f5f5;
+    border: 1px solid #d1d5db;
+    border-bottom: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 8px;
+    gap: 5px;
+    flex-wrap: wrap; 
+}
+
+.radio-group {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap; 
+}
+.radio-group .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+.radio-group input[type="radio"] {
+    appearance: none; 
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.radio-group input[type="radio"]:checked {
+    border-color: var(--primary-blue);
+}
+.radio-group input[type="radio"]:checked::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background-color: var(--primary-blue);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.radio-group label {
+    margin-bottom: 0;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+.modal-footer-design {
+    display: none; 
+}
+.sidebar-nav a.muted-list-item {
+    color: var(--text-dark); 
+    border: 1px solid var(--border, #e5e5e5); 
+    padding: 7px 10px; 
+    background-color: #f8f8f8; 
+    
+}
+
+/* Update the hover style to maintain the look when moused over */
+.sidebar-nav a.muted-list-item:hover:not(.active) {
+    background-color: #e8e8e8; 
+    color: var(--text-dark); 
+    border-color: #c0c0c0; 
+}
+.low-stock-red {
+    color: var(--color-danger, #d32f2f) !important;
+    font-weight: 600; 
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">Tropicart</div>
+
+    <nav class="sidebar-nav">
+        <ul class="nav-section">
+            <li><a class="nav-item" href="admin_dashboard.html"><i data-feather="bar-chart-2"></i> Dashboard</a></li>
+           </ul>
+
+        <ul class="nav-section">
+            <li>
+                <button class="nav-item has-children" id="managementDropdown">
+                    <i data-feather="grid"></i>
+                    <span>Management</span>
+                    <i class="chevron" data-feather="chevron-right"></i>
+                </button>
+
+                <ul class="sub-menu" id="managementSubMenu">
+                 <li><a href="#" class="muted-list-item active" data-page="product-list"><i data-feather="box"></i> Product List</a></li> 
+                 <li><a href="admin_orderlist.html"><i data-feather="users"></i> Order List</a></li>
+                    <li><a href="#"><i data-feather="user"></i> Customer List</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul class="nav-section">
+           <li><a class="nav-item" href="admin_reports.html"><i data-feather="file-text"></i> Reports</a></li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul class="nav-section">
+            <li><a class="nav-item" href="#"><i data-feather="settings"></i> Settings</a></li>
+            <li><a class="nav-item" href="#"><i data-feather="bell"></i> Notifications</a></li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul class="nav-section">
+            <li><a class="nav-item logout" href="#"><i data-feather="log-out"></i> Log Out</a></li>
+        </ul>
+
+    </nav>
+</aside>
+
+
+<div class="main-container">
+    <header class="top-header">
+        <h1 class="header-title">Product Management</h1>
+        <div class="user-profile">
+            <span>Admin User</span>
+            <img src="https://via.placeholder.com/40x40/00796b/ffffff?text=AU" alt="User Avatar">
+        </div>
+    </header>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <i data-feather="package"></i>
+            <div class="stat-content">
+                <div class="stat-value" id="totalProducts">0</div>
+                <div class="stat-label">Total Products</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i data-feather="check-circle"></i>
+            <div class="stat-content">
+                <div class="stat-value" id="liveProducts">0</div>
+                <div class="stat-label">Live Products</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i data-feather="alert-triangle"></i>
+            <div class="stat-content">
+                <div class="stat-value text-danger" id="lowStock">0</div>
+                <div class="stat-label">Low Stock Alerts</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="listing-section">
+        <div class="inventory-controls">
+            <h3>Product Inventory</h3>
+            <div class="controls-right">
+                <div class="search-filter-area">
+                    <input type="text" id="searchBox" placeholder="Search product ID or name...">
+                    <select id="filterStatus">
+                        <option value="all">All Status</option>
+                        <option value="live">Live</option>
+                        <option value="draft">Draft</option>
+                        <option value="low">Low Stock</option>
+                    </select>
+                </div>
+                <button class="btn-new-product" id="openModalBtn"><i data-feather="plus"></i> New Product</button>
+            </div>
+        </div>
+        <div class="table-scroll">
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Product</th><th>Description</th><th>Price</th><th>Stock</th><th>Publish</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody"></tbody>
+            </table>
+        </div>
+        <div class="inventory-footer">
+    <div class="pagination-container">
+        <button id="prevPageBtn"><i data-feather="arrow-left"></i></button>
+        <div id="paginationNumbers" class="pagination-numbers"></div>
+        <button id="nextPageBtn"><i data-feather="arrow-right"></i></button>
+    </div>
+</div>
+
+    </div>
+</div>
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        
+        <div class="modal-header-design">
+            <div>
+                <h2 id="formTitle">Add New Product</h2>
+                <p class="subtitle">Enter product details and media to add a new item to your store inventory.</p>
+            </div>
+            <div class="modal-header-actions">
+                <button type="button" class="btn btn-cancel" id="cancelModalBtn">Cancel</button>
+                <button type="submit" class="btn btn-submit" id="submitBtn">Save</button>
+            </div>
+        </div>
+
+        <form id="productForm" enctype="multipart/form-data">
+            
+            <div class="modal-form-grid">
+                
+                <div class="left-column">
+                    <div class="card-design">
+                        <h4>Product Media</h4>
+                        <div class="form-group" style="text-align: center;">
+                            <img id="currentImagePreview" src="https://via.placeholder.com/250x180/E0E0E0/6c757d?text=No+Image" alt="Product Thumbnail" class="uploaded-thumbnail">
+                            <label for="pUpload">Upload Image</label>
+                            <input type="file" id="pUpload" name="image" accept="image/*">
+                        </div>
+                    </div>
+                    
+                    <div class="card-design">
+                        <h4>Status</h4>
+                        <p class="card-description">Set the visibility of this product on your storefront.</p>
+                        <div class="form-group">
+                            <label for="isPublished">Set Status</label>
+                            <div class="status-select-wrapper">
+                                <select id="isPublished" name="published">
+                                    <option value="1">Published (Live)</option>
+                                    <option value="0">Draft (Hidden)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+                
+                <div class="right-column">
+                    <div class="card-design">
+                        <h4>General Information</h4>
+                        <p class="card-description">Basic details like name and description.</p>
+                        <div class="form-group">
+                            <label for="pName">Product Name</label>
+                            <input type="text" id="pName" name="name" placeholder="E.g., Tropical Paradise Smoothie" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pDesc">Description</label>
+                            <textarea id="pDesc" name="description" rows="5" required></textarea>
+                            <span class="section-hint">Provide a detailed description of the product.</span>
+                        </div>
+                    </div>
+
+                    <div class="card-design">
+                        <h4>Inventory & Pricing</h4>
+                        <div class="form-group">
+                            <label for="pPrice">Price (PHP)</label>
+                            <input type="number" id="pPrice" name="price" step="0.01" placeholder="0.00" required>
+                        </div>
+                           
+                        <div class="form-group">
+                            <label for="pStock">Stock Quantity</label>
+                            <input type="number" id="pStock" name="stock" required>
+                            <span class="section-hint">The current number of units available.</span>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div> 
+        </form>
+    </div>
+</div>
+<script>
+    
+// ========== SEARCH + FILTER ==========
+
+// Listeners
+document.getElementById("searchBox").addEventListener("input", applySearchFilter);
+document.getElementById("filterStatus").addEventListener("change", applySearchFilter);
+
+function applySearchFilter() {
+    const searchValue = document.getElementById("searchBox").value.toLowerCase().trim();
+    const filterValue = document.getElementById("filterStatus").value;
+
+    let filtered = window.allProducts.filter(p => {
+        let matchSearch =
+            p.name.toLowerCase().includes(searchValue) ||
+            String(p.product_id).includes(searchValue);
+
+        let matchFilter = true;
+        if (filterValue === "live") matchFilter = p.published == 1;
+        if (filterValue === "draft") matchFilter = p.published == 0;
+        if (filterValue === "low") matchFilter = p.stock < 10; // Low stock threshold
+
+        return matchSearch && matchFilter;
+    });
+
+    currentPage = 1; // reset to page 1 when filtering
+    renderProductsTable(filtered);
+}
+
+// Your existing JavaScript, modified to handle the modal
+const tableBody = document.getElementById('productTableBody');
+const form = document.getElementById('productForm');
+const modal = document.getElementById('productModal');
+const openModalBtn = document.getElementById('openModalBtn');
+const formTitle = document.getElementById('formTitle'); // Title in the modal header
+const submitBtn = document.getElementById('submitBtn'); // Save button in the modal header
+// NEW: Get the new cancel button and image preview elements
+const cancelModalBtn = document.getElementById('cancelModalBtn'); // Cancel button in the modal header
+const pUpload = document.getElementById('pUpload');
+const imagePreview = document.getElementById('currentImagePreview');
+
+// NEW: Sidebar Dropdown Element
+const managementDropdown = document.getElementById('managementDropdown');
+const managementSubMenu = document.getElementById('managementSubMenu');
+
+let editMode = false;
+let editProductId = null;
+let currentPage = 1;
+const rowsPerPage = 8;
+window.allProducts = [];
+
+// NEW: Sidebar Dropdown Toggle Logic
+managementDropdown.addEventListener('click', () => {
+    managementDropdown.classList.toggle('open');
+    // Simple toggle based on class is enough since CSS handles the display
+});
+
+// Modal Open/Close Logic
+function closeModal() {
+    modal.style.display = "none";
+    form.reset();
+    imagePreview.src = "https://via.placeholder.com/250x180/E0E0E0/6c757d?text=No+Image"; // Reset image preview
+}
+
+openModalBtn.onclick = () => { 
+    formTitle.textContent='Add New Product'; 
+    submitBtn.textContent='Save'; 
+    form.reset(); 
+    editMode=false; 
+    editProductId=null; 
+    imagePreview.src = "https://via.placeholder.com/250x180/E0E0E0/6c757d?text=No+Image"; // Reset image preview
+    modal.style.display="flex"; // Use 'flex' for the new centered layout
+}
+// Updated close listeners (using the header buttons)
+cancelModalBtn.onclick = closeModal;
+submitBtn.onclick = (e) => { // Trigger form submit when the Save button is clicked
+    e.preventDefault(); // Prevent default button action
+    form.dispatchEvent(new Event('submit')); // Manually trigger the form submit event
+};
+window.onclick = e => { if(e.target==modal) closeModal(); }
+
+// NEW: Image Preview Handler
+pUpload.addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagePreview.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    } else {
+        imagePreview.src = "https://via.placeholder.com/250x180/E0E0E0/6c757d?text=No+Image"; // Reset on no file
+    }
+});
+
+
+// Short description
+const shortDesc = d => d.split(' ').slice(0,3).join(' ') + '...'; // Added '...' for visual cue
+document.getElementById('prevPageBtn').onclick = () => {
+    // Only fetch if a product list exists, otherwise it tries to page 8 rows on a 0-length array
+    if(window.allProducts.length === 0) return;
+    if(currentPage > 1){
+        currentPage--;
+        renderProductsTable(window.allProducts);
+    }
+}
+
+document.getElementById('nextPageBtn').onclick = () => {
+    // Only fetch if a product list exists
+    if(window.allProducts.length === 0) return;
+    const totalPages = Math.ceil(window.allProducts.length / rowsPerPage);
+    if(currentPage < totalPages){
+        currentPage++;
+        renderProductsTable(window.allProducts);
+    }
+}
+
+// Render products
+function renderProductsTable(products) {
+    tableBody.innerHTML = '';
+
+    const totalPages = Math.ceil(products.length / rowsPerPage);
+    if (currentPage > totalPages) currentPage = totalPages; // clamp to max page
+    if (currentPage < 1) currentPage = 1; // clamp to min page
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const paginated = products.slice(start, end);
+
+    if (paginated.length === 0 && products.length > 0 && currentPage > 1) {
+        // Fallback if the last item on a page was deleted/filtered, go to previous page
+        currentPage--;
+        renderProductsTable(products);
+        return;
+    }
+
+    paginated.forEach(p => {
+        // NEW LOGIC: Low stock threshold moved to 15 (as used in CSS example)
+        // NOTE: The filter logic in applySearchFilter still uses 10 as you defined it.
+        const stockClass = p.stock < 15 ? 'low-stock-red' : '';
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+        <td>#${String(p.product_id).padStart(3,'0')}</td>
+        <td><div class="product-name"><img src="${p.image}">${p.name}</div></td>
+        <td class="short-desc">${shortDesc(p.description)}</td>
+        <td>₱${p.price}</td>
+        <td><span class="${stockClass}">${p.stock}</span></td>
+        <td>
+            <label class="switch">
+                <input type="checkbox" class="toggle-live" data-id="${p.product_id}" ${p.published==1?'checked':''}>
+                <span class="slider round"></span>
+            </label>
+        </td>
+        <td>
+            <div class="action-buttons">
+                <button class="btn-edit" data-id="${p.product_id}"><i data-feather="edit-2"></i></button>
+                <button class="btn-remove" data-id="${p.product_id}"><i data-feather="trash-2"></i></button>
+            </div>
+        </td>`;
+        tableBody.appendChild(tr);
+    });
+
+    // Disable/enable arrows
+    document.getElementById('prevPageBtn').disabled = currentPage === 1;
+    document.getElementById('nextPageBtn').disabled = currentPage >= totalPages || totalPages===0;
+
+    // Render numeric buttons
+    const paginationNumbers = document.getElementById('paginationNumbers');
+    paginationNumbers.innerHTML = '';
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        if(i === currentPage) btn.classList.add('active');
+        btn.onclick = () => { currentPage = i; renderProductsTable(products); };
+        paginationNumbers.appendChild(btn);
+    }
+
+    feather.replace();
+}
+
+// Fetch products
+function fetchProducts(){
+    fetch('admin_get_products.php').then(res=>res.json()).then(data=>{
+        if(data.status==='success'){ 
+            window.allProducts=data.products;
+            // Use applySearchFilter to render/refresh the table, maintaining any filters/search in place
+            applySearchFilter(); 
+            // UPDATE STATS
+            updateStats(window.allProducts);
+        }
+    });
+}
+
+// NEW FUNCTION: Update the dashboard stats
+function updateStats(products) {
+    document.getElementById('totalProducts').textContent = products.length;
+    document.getElementById('liveProducts').textContent = products.filter(p => p.published == 1).length;
+    // NOTE: Low stock threshold for stats is 10, as defined in applySearchFilter
+    document.getElementById('lowStock').textContent = products.filter(p => p.stock < 10).length;
+}
+
+// Form submit
+form.addEventListener('submit', e=>{
+    e.preventDefault();
+    const formData = new FormData(form);
+    const url = editMode && editProductId ? 'admin_update_product.php' : 'admin_add_products.php';
+    if(editMode) formData.append('product_id', editProductId);
+
+    fetch(url,{method:'POST',body:formData})
+    .then(res=>res.json()).then(data=>{
+        if(data.status==='success'){ 
+            alert(editMode?'Updated!':'Added!'); 
+            closeModal(); // Use the new close function
+            fetchProducts(); 
+        }
+    });
+});
+
+// Edit/Delete/Toggle
+tableBody.addEventListener('click', e=>{
+    const target=e.target.closest('button'); if(!target) return; const id=target.dataset.id;
+    if(target.classList.contains('btn-edit')){
+        const prod=window.allProducts.find(p=>p.product_id==id);
+        if(prod){ 
+            document.getElementById('pName').value=prod.name; 
+            document.getElementById('pDesc').value=prod.description; 
+            document.getElementById('pPrice').value=prod.price; 
+            document.getElementById('pStock').value=prod.stock; 
+            // Ensure the value for the select matches one of the options (1 or 0)
+            document.getElementById('isPublished').value=prod.published == 1 ? "1" : "0"; 
+            
+            // Set image preview for editing
+            imagePreview.src = prod.image || "https://via.placeholder.com/250x180/E0E0E0/6c757d?text=No+Image";
+            
+            editMode=true; 
+            editProductId=id; 
+            formTitle.textContent='Edit #'+id; 
+            submitBtn.textContent='Update'; 
+            modal.style.display="flex"; // Use 'flex' for the new centered layout
+        }
+    }
+    if(target.classList.contains('btn-remove')){ 
+        if(confirm('Delete this product?')){ 
+            fetch('admin_delete_product.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({product_id:id})}).then(r=>r.json()).then(d=>{if(d.status==='success') fetchProducts();}); 
+        }
+    }
+});
+
+tableBody.addEventListener('change', e=>{
+    const target=e.target;
+    if(target.classList.contains('toggle-live')){
+        const id=parseInt(target.dataset.id);
+        const newPub=target.checked?1:0;
+        
+        // 1. Send update to server
+        fetch('admin_publish_product.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({product_id:id,published:newPub})})
+        .then(r=>r.json())
+        .then(d=>{
+            if(d.status==='success' || d.status === undefined){ // Assume success if no error status returned
+                
+                // 2. Find and update the product in the local array
+                const productIndex = window.allProducts.findIndex(p => p.product_id === id);
+                if (productIndex !== -1) {
+                    window.allProducts[productIndex].published = newPub;
+                }
+                
+                // 3. Re-render the table to reflect the change immediately
+                // Use fetchProducts() to refresh all data, including stats
+                fetchProducts(); 
+            } else { 
+                alert('Error updating status on server.'); 
+                // Revert the toggle visually if the server request failed
+                target.checked=!target.checked; 
+            }
+        })
+        .catch(error => {
+            console.error('Network or parsing error:', error);
+            alert('A network error occurred. Please refresh.');
+            // Revert the toggle visually if an error occurred
+            target.checked = !target.checked;
+        });
+    }
+});
+
+fetchProducts();
+feather.replace(); // Call feather icons on initial load
+
+</script>
+</body>
+</html>

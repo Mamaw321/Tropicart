@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tropicart Admin - Shipment Management</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/feather-icons"></script>
+
+<!-- Leaflet CSS / JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<style>
+:root{
+    --sidebar-bg:#ffffff;
+    --page-bg:#eeeeee;
+    --card-bg:#ffffff;
+    --text-dark:#222;
+    --text-muted:#6c6c6c;
+    --border:#e5e5e5;
+    --radius:12px;
+    --primary-color:#333;
+    --hover:#f4f4f4;
+    --modal-backdrop: rgba(0,0,0,0.4);
+    --modal-background:#F8F9FA;
+    --modal-border:#E0E0E0;
+    --shadow: 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-hover: 0 6px 15px rgba(0,0,0,0.06);
+}
+
+/* base */
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+body{display:flex;height:100vh;background:var(--page-bg);color:var(--text-dark);overflow:hidden;}
+a{color:inherit;text-decoration:none;}
+
+/* SIDEBAR */
+aside.sidebar{
+    width:220px;
+    background:var(--sidebar-bg);
+    padding:20px;
+    box-shadow:2px 0 10px rgba(0,0,0,0.05);
+    overflow:auto;
+}
+.sidebar-logo{font-size:1.3rem;font-weight:700;color:var(--primary-color);margin-bottom:18px;}
+.sidebar-nav ul{list-style:none;display:flex;flex-direction:column;gap:8px;padding-left:0;}
+.sidebar-nav a, .sidebar-nav button.nav-item {
+    display:flex; align-items:center; padding:10px; border-radius:10px; color:var(--text-muted);
+    background:none;border:none; width:100%; text-align:left; cursor:pointer;
+}
+.sidebar-nav a:hover:not(.active), .sidebar-nav button.nav-item:hover:not(.open){
+    background:var(--hover); color:var(--text-dark);
+}
+.sidebar-nav a.active, .sidebar-nav button.nav-item.open{
+    background:#eaeaea; color:var(--primary-color); font-weight:600;
+}
+.sidebar-nav a svg, .sidebar-nav button.nav-item svg{width:18px;height:18px;margin-right:10px;}
+.divider{width:100%;height:1px;background:var(--border);margin:12px 0;}
+
+/* MAIN */
+.main-container{flex:1;display:flex;flex-direction:column;overflow:auto;}
+header.top-header{background:var(--card-bg);padding:14px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5;}
+.header-title{font-size:1.2rem;font-weight:600;}
+.user-profile{display:flex;align-items:center;gap:10px;}
+.user-profile img{border-radius:50%;width:36px;height:36px;object-fit:cover;}
+.content-area{padding:20px;}
+
+/* dashboard cards */
+.stats-container{display:flex;gap:12px;background:var(--card-bg);padding:14px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:16px;align-items:center;}
+.stat-card{flex:1;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;}
+.stat-content{display:flex;flex-direction:column;}
+.stat-value{font-size:1.4rem;font-weight:700;}
+.stat-label{font-size:0.86rem;color:var(--text-muted);}
+
+/* card wrapper for table */
+.card { background: var(--card-bg); border-radius: var(--radius); padding: 18px; border:1px solid var(--border); box-shadow:var(--shadow); }
+
+/* controls */
+.controls {display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px;flex-wrap:wrap;}
+.controls-left{display:flex;gap:12px;align-items:center;}
+.search-input, .filter-select { padding:10px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.95rem; }
+.search-input{width:320px;}
+
+/* table */
+.table-scroll{overflow:auto;}
+.order-table{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:0.95rem;text-align:left;}
+.order-table thead th{padding:10px 12px;color:var(--text-muted);text-transform:uppercase;font-size:0.75rem;letter-spacing:0.04em;}
+.order-table td{background:var(--card-bg);padding:12px;border-bottom:1px solid transparent;vertical-align:middle;box-shadow:0 1px 3px rgba(0,0,0,0.03);}
+.order-table tbody tr:nth-child(odd){background:#fbfbfb;}
+.order-table tbody tr:hover td{background:#f0f0f0;}
+.order-table td:first-child{width:90px;text-align:center;}
+.order-table td:nth-child(2){min-width:180px;}
+.order-table td:nth-child(3){min-width:120px;}
+.order-table td:nth-child(4){width:110px;}
+.order-table td:nth-child(5){width:120px;text-align:center;}
+.order-table td:nth-child(6){width:180px;text-align:right;}
+
+/* badges */
+.badge{padding:6px 10px;border-radius:9999px;font-weight:600;font-size:0.82rem;display:inline-block;}
+.badge-packed{background:#eff6ff;color:#1d4ed8;}
+.badge-in_transit{background:#fff7ed;color:#c2410c;}
+.badge-out_for_delivery{background:#fefce8;color:#854d0e;}
+.badge-delivered{background:#f0fdf4;color:#16a34a;}
+.badge-returned{background:#fef2f2;color:#b91c1c;}
+
+/* dropdown / action */
+.update-dropdown{padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600;margin-left:8px;}
+.actions-container{display:flex;gap:8px;align-items:center;justify-content:flex-end;}
+
+/* pagination */
+.pagination-container{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:12px;}
+.pagination-container button{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600;}
+.pagination-container button:disabled{opacity:.5;cursor:not-allowed;}
+
+/* modal */
+.modal{display:none;position:fixed;inset:0;background:var(--modal-backdrop);justify-content:center;align-items:center;z-index:999;}
+.modal.show{display:flex;}
+.modal-content{background:var(--modal-background);padding:0;border-radius:12px;width:95%;max-width:1000px;max-height:90vh;overflow:hidden;border:1px solid var(--modal-border);box-shadow:var(--shadow-hover);display:flex;flex-direction:column;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--modal-border);}
+.modal-section{background:#fff;border:1px solid var(--modal-border);padding:12px;border-radius:10px;margin-bottom:12px;}
+.muted{color:var(--text-muted);}
+
+/* map modal content */
+#mapModal .modal-content{height:600px;padding:0;display:flex;flex-direction:column;}
+#map { flex:1; height:100%; min-height:450px; border-radius:0 0 12px 12px; }
+.map-header{padding:12px 16px;background:#fff;border-bottom:1px solid var(--modal-border);display:flex;justify-content:space-between;align-items:center;}
+
+/* responsive */
+@media (max-width:1000px){
+    .sidebar{width:72px;padding:12px;}
+    .sidebar-logo{font-size:1rem;}
+    .main-container{margin-left:72px;}
+    .search-input{width:100%;}
+}
+@media (max-width:650px){
+    body{flex-direction:column;}
+    aside.sidebar{width:100%;height:auto;box-shadow:none;display:flex;}
+    .main-container{padding:12px;}
+    .stats-container{flex-direction:column;gap:8px;}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">Tropicart</div>
+    <nav class="sidebar-nav">
+        <ul>
+            <li><a href="#"><i data-feather="bar-chart-2"></i> Dashboard</a></li>
+        </ul>
+
+        <ul>
+            <li>
+                <button class="nav-item has-children" id="managementDropdown">
+                    <i data-feather="grid"></i>
+                    <span>Management</span>
+                    <i class="chevron" data-feather="chevron-right"></i>
+                </button>
+
+                <ul class="sub-menu">
+                    <li><a href="admin_addproduct.html"><i data-feather="box"></i> Product List</a></li>
+                    <li><a href="admin_orderlist.html"><i data-feather="file-text"></i> Order List</a></li>
+                    <li><a class="active" href="#"><i data-feather="truck"></i> Shipment</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul>
+            <li><a href="admin_reports.html"><i data-feather="file-text"></i> Reports</a></li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul>
+            <li><a href="#"><i data-feather="settings"></i> Settings</a></li>
+            <li><a href="#"><i data-feather="bell"></i> Notifications</a></li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul>
+            <li><a href="#"><i data-feather="log-out"></i> Log Out</a></li>
+        </ul>
+    </nav>
+</aside>
+
+<div class="main-container">
+    <header class="top-header">
+        <div class="header-title">Shipment Management</div>
+
+        <div class="user-profile">
+            <span id="shipCountDisplay" class="muted">0 Shipments</span>
+            <img src="https://via.placeholder.com/40x40/00796b/ffffff?text=AU" alt="Admin">
+        </div>
+    </header>
+
+    <div class="content-area">
+
+        <div class="stats-container" id="shipStatsContainer"></div>
+
+        <div class="card">
+            <div class="controls">
+                <div class="controls-left">
+                    <input id="searchBox" class="search-input" placeholder="Search by name or ID...">
+                    <select id="filterStatus" class="filter-select">
+                        <option value="all">Filter by Status (All)</option>
+                        <option value="packed">Packed</option>
+                        <option value="in_transit">Out for Delivery</option>
+                        <option value="out_for_delivery">Out for Delivery</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="returned">Returned</option>
+                    </select>
+                </div>
+                <div class="controls-right"></div>
+            </div>
+
+            <div class="table-scroll">
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer Name</th>
+                            <th>Date</th>
+                            <th>Courier</th>
+                            <th>Status</th>
+                            <th style="text-align:right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shipTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container">
+                <span id="paginationInfo"></span>
+                <button id="prevPageBtn" disabled>Previous</button>
+                <button id="nextPageBtn" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Details modal -->
+<div id="shipDetailModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalShipTitle">Shipment Details</h2>
+            <button id="closeModalBtn" style="font-size:22px;border:none;background:none;cursor:pointer;">&times;</button>
+        </div>
+
+        <div id="modalShipDetails" style="padding:18px;"></div>
+    </div>
+</div>
+
+<!-- Map modal -->
+<div id="mapModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+        <div class="map-header">
+            <div><strong id="mapTitle">Tracking — Order #0000</strong></div>
+            <div>
+                <button id="cancelTrackingBtn" class="update-dropdown">Cancel</button>
+                <button id="closeMapBtn" class="update-dropdown" style="margin-left:8px;">Close</button>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+</div>
+
+<script>
+feather.replace();
+
+/* === Config: endpoints ===
+   - admin_fetch_orders.php
+   - admin_fetch_shipments.php
+   - admin_create_shipment.php
+   - admin_update_shipment_status.php
+   - admin_fetch_last_event.php
+   - admin_record_event.php
+*/
+const FETCH_ORDERS = 'admin_fetch_orders.php';
+const FETCH_SHIPMENTS = 'admin_fetch_shipments.php';
+const CREATE_SHIPMENT = 'admin_create_shipment.php';
+const UPDATE_SHIPMENT = 'admin_update_shipment_status.php';
+
+let allShipments = [];     // orders array (from orders endpoint)
+let backendShipments = []; // shipments records (from shipments table)
+let displayed = [];
+let currentPage = 1;
+const rowsPerPage = 10;
+
+// Hub coord fallback (SM City Bacolod)
+const HUB_COORD = { lat: 10.6755, lng: 122.9511 };
+
+// Destinations
+const NEGROS_CITIES = [
+    { name: "Bacolod", lat: 10.6760, lng: 122.9530 },
+    { name: "Talisay", lat: 10.6969, lng: 122.9655 },
+    { name: "Silay", lat: 10.8454, lng: 122.9566 },
+    { name: "Bago", lat: 10.5331, lng: 122.8331 },
+    { name: "Murcia", lat: 10.6050, lng: 123.0410 },
+    { name: "Victorias", lat: 10.9014, lng: 123.0856 },
+    { name: "San Carlos", lat: 10.4891, lng: 123.4132 },
+    { name: "Kabankalan", lat: 9.9851, lng: 122.8146 },
+    { name: "La Carlota", lat: 10.4239, lng: 122.9221 }
+];
+
+function money(n){ return '₱' + Number(n||0).toFixed(2); }
+function getOrderId(o){ return o.orders_id ?? o.order_id ?? o.id ?? null; }
+function formatOrderId(o){ const id=getOrderId(o); return id?('#'+String(id).padStart(4,'0')):'#0000'; }
+function safe(s){ return s==null?'N/A':String(s); }
+
+/* ---------- initialize and load orders + shipments ---------- */
+async function initializeShipment(){
+    try {
+        const res = await fetch(FETCH_ORDERS, { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('Fetch failed (orders)');
+        const orders = await res.json();
+        allShipments = Array.isArray(orders) ? orders : [];
+        await fetchBackendShipments();
+        mergeShipmentStatus();
+        applyFilters(true);
+    } catch (err) {
+        console.error('initializeShipment error', err);
+        document.getElementById('shipTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Failed to load orders.</td></tr>`;
+    }
+}
+async function fetchBackendShipments(){
+    try {
+        const r = await fetch(FETCH_SHIPMENTS, { credentials: 'same-origin' });
+        if (!r.ok) throw new Error('Fetch failed (shipments)');
+        const s = await r.json();
+        backendShipments = Array.isArray(s) ? s : [];
+    } catch(e){
+        console.warn('fetchBackendShipments failed', e);
+        backendShipments = [];
+    }
+}
+function mergeShipmentStatus(){
+    allShipments.forEach(o => {
+        const oid = String(getOrderId(o));
+        const sh = backendShipments.find(x => String(x.order_id) === oid);
+        if (sh) {
+            let backendStatus = (sh.status || '').toLowerCase();
+            if (backendStatus === 'shipped') backendStatus = 'in_transit';
+            o.status = backendStatus;
+            if (sh.dest_lat) o.shipping_lat = sh.dest_lat;
+            if (sh.dest_lng) o.shipping_lng = sh.dest_lng;
+            if (sh.last_lat) o.lastLat = sh.last_lat;
+            if (sh.last_lng) o.lastLng = sh.last_lng;
+        }
+    });
+}
+
+initializeShipment();
+
+/* ---------- UI rendering ---------- */
+function renderStats(){
+    const container = document.getElementById('shipStatsContainer');
+    const byStatus = { packed:0, in_transit:0, out_for_delivery:0, delivered:0, returned:0, processing:0 };
+    allShipments.forEach(s => {
+        let st = (s.status||'').toString().toLowerCase();
+        if (st === 'shipped') st = 'in_transit';
+        if (byStatus[st] !== undefined) byStatus[st]++;
+    });
+    const data = [
+        {label:'Processing/Packed', value: (byStatus.processing + byStatus.packed), icon:'truck'},
+        // COMBINED: In Transit + Out for Delivery under one label
+        {label:'Out For Delivery', value: (byStatus.in_transit + byStatus.out_for_delivery), icon:'truck'},
+        {label:'Delivered', value: byStatus.delivered, icon:'check-circle'}
+    ];
+    document.getElementById('shipCountDisplay').textContent = displayed.length + ' Shipments';
+    container.innerHTML = data.map(d => `
+        <div class="stat-card">
+            <i data-feather="${d.icon}"></i>
+            <div class="stat-content">
+                <div class="stat-value">${d.value}</div>
+                <div class="stat-label">${d.label}</div>
+            </div>
+        </div>
+    `).join('');
+    feather.replace();
+}
+
+function renderTable(){
+    const tbody = document.getElementById('shipTableBody');
+    tbody.innerHTML = '';
+    const start = (currentPage-1)*rowsPerPage;
+    const pageData = displayed.slice(start, start + rowsPerPage);
+    if (!pageData.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">No shipments to display.</td></tr>`;
+        updatePagination();
+        return;
+    }
+    pageData.forEach(o => {
+        const orderId = getOrderId(o);
+        const tr = document.createElement('tr');
+    let status = (o.status||'processing').toString().toLowerCase();
+        if (status === 'shipped') status = 'in_transit';
+        
+        let displayText = status.replace(/_/g, ' ');
+        // --- ADDED: Override display text for 'in_transit' ---
+        if (status === 'in_transit') {
+            displayText = 'Out For Delivery';
+        }
+        
+        const badgeClass = 'badge-' + status.replace(/\s+/g,'_');
+        const date = safe(o.order_date ?? o.created_at ?? o.order_date_time);
+        const courier = safe(o.courier ?? 'Tropicart');
+        tr.innerHTML = `
+            <td>${formatOrderId(o)}</td>
+            <td>${safe(o.customer_name)}</td>
+            <td>${date}</td>
+            <td>${courier}</td>
+            <td style="text-align:center"><span class="badge ${badgeClass}">${displayText}</span></td>
+            <td style="text-align:right">
+        
+                <div class="actions-container">
+                    <button class="update-dropdown" data-order='${orderId}' data-action="details"><i data-feather="eye"></i></button>
+                    <button class="update-dropdown" data-order='${orderId}' data-action="track"><i data-feather="map-pin"></i></button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+    feather.replace();
+    updatePagination();
+
+    // wire buttons
+    tbody.querySelectorAll('button').forEach(btn => {
+        const action = btn.dataset.action;
+        const oid = btn.dataset.order;
+        const orderObj = allShipments.find(x => String(getOrderId(x)) === String(oid));
+        if (!orderObj) return;
+        if (action === 'details') btn.onclick = () => openDetailsModal(orderObj);
+        if (action === 'track') btn.onclick = () => openMapModal(orderObj, false); // IMPORTANT: do NOT start tracking here
+    });
+}
+
+function updatePagination(){
+    const total = displayed.length;
+    const totalPages = Math.max(1, Math.ceil(total/rowsPerPage));
+    document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+    document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+    const start = total === 0 ? 0 : (currentPage-1)*rowsPerPage + 1;
+    const end = Math.min(currentPage*rowsPerPage, total);
+    document.getElementById('paginationInfo').textContent = total ? `Showing ${start}-${end} of ${total} shipments` : 'No shipments';
+}
+
+/* pagination events */
+document.getElementById('prevPageBtn').addEventListener('click', ()=>{ if (currentPage>1) { currentPage--; renderTable(); } });
+document.getElementById('nextPageBtn').addEventListener('click', ()=>{ const totalPages = Math.ceil(displayed.length/rowsPerPage); if (currentPage<totalPages) { currentPage++; renderTable(); } });
+
+/* search/filter */
+document.getElementById('searchBox').addEventListener('input', applyFilters);
+document.getElementById('filterStatus').addEventListener('change', applyFilters);
+function applyFilters(initialLoad = false) {
+    const q = document.getElementById('searchBox').value.toLowerCase().trim();
+    const f = document.getElementById('filterStatus').value;
+
+    displayed = allShipments.filter(s => {
+        const orderId = String(getOrderId(s) ?? '').toLowerCase();
+        let status = (s.status || '').toLowerCase();
+
+        if (status === 'shipped') status = 'in_transit';
+
+        const matchesSearch =
+            (!q) ||
+            orderId.includes(q) ||
+            ((s.customer_name || '').toLowerCase().includes(q));
+
+        const matchesFilter =
+            (f === 'all') || (status === f);
+
+        return matchesSearch && matchesFilter;
+    });
+
+    currentPage = 1;
+    renderStats();
+    renderTable();
+}
+
+/* ---------- DETAILS MODAL ---------- */
+const detailModal = document.getElementById('shipDetailModal');
+const modalTitle = document.getElementById('modalShipTitle');
+const modalDetails = document.getElementById('modalShipDetails');
+let currentDetailOrder = null;
+
+function openDetailsModal(order){
+    currentDetailOrder = order;
+    modalTitle.textContent = `Order ${formatOrderId(order)} Details`;
+    const items = Array.isArray(order.items) ? order.items : (order.order_items ?? []);
+    let status = (order.status||'processing').toString().toLowerCase();
+    if (status === 'shipped') status = 'in_transit';
+
+    // Decide whether to show Confirm Shipment button
+    const hideConfirm = ['shipped','in_transit','out_for_delivery','delivered','returned'].includes(status);
+
+    modalDetails.innerHTML = `
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div class="modal-section" style="flex:1;min-width:280px">
+                <h3><i data-feather="user" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i> Customer Info</h3>
+                <p><strong>Name:</strong> ${safe(order.customer_name)}</p>
+                <p><strong>Email:</strong> ${safe(order.customer_email ?? 'N/A')}</p>
+                <p><strong>Phone:</strong> ${safe(order.customer_phone ?? 'N/A')}</p>
+                <p><strong>Address:</strong> ${safe(order.shipping_address)}</p>
+            </div>
+            <div class="modal-section" style="flex:1;min-width:280px">
+                <h3><i data-feather="dollar-sign" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i> Summary</h3>
+                <p><strong>Subtotal:</strong> ${money(order.subtotal ?? order.sub_total ?? 0)}</p>
+                <p><strong>Shipping:</strong> ${money(order.shipping_fee ?? 0)}</p>
+                <p><strong>Total:</strong> ${money(order.total ?? order.total_amount ?? 0)}</p>
+                <p><strong>Status:</strong> <span class="badge ${'badge-'+status.replace(/_/g,'_')}">${status.replace(/_/g,' ')}</span></p>
+            </div>
+        </div>
+        <div class="modal-section">
+            <h3><i data-feather="list" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i> Items</h3>
+            <ul style="padding-left:20px;margin-top:8px">
+                ${items.map(it => `<li>${(it.quantity||it.qty||1)} × ${safe(it.product_name||it.name)} — ${money(it.price_at_time ?? it.price ?? 0)}</li>`).join('')}
+            </ul>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;padding:12px;">
+            <button id="modalViewMapBtn" class="update-dropdown"><i data-feather="map-pin"></i> View Map</button>
+            ${hideConfirm ? '' : '<button id="modalConfirmShipmentBtn" class="update-dropdown" style="background:#1f9d55;color:#fff;border:none;">Confirm Shipment</button>'}
+        </div>
+    `;
+    feather.replace();
+    detailModal.classList.add('show');
+    detailModal.setAttribute('aria-hidden','false');
+
+    // View map should NOT start tracking; just show the map & the job marker/route (if exists)
+    document.getElementById('modalViewMapBtn').onclick = () => { hideDetailsModal(); openMapModal(order, false); };
+    const confirmBtn = document.getElementById('modalConfirmShipmentBtn');
+    if (confirmBtn) confirmBtn.onclick = () => confirmShipment(order);
+}
+document.getElementById('closeModalBtn').onclick = () => hideDetailsModal();
+function hideDetailsModal(){ detailModal.classList.remove('show'); detailModal.setAttribute('aria-hidden','true'); currentDetailOrder=null; }
+
+/* ---------- MAP / TRACKING (fixed) ---------- */
+/* trackingJobs: one job per orderId
+   job structure:
+   {
+     interval: setInterval id | null,
+     marker: L.Marker | null,
+     routeLine: L.Polyline | null,
+     start: {lat,lng},
+     dest: {lat,lng},
+     steps, currentStep, stepMs, boundsApplied
+   }
+*/
+let map = null, tileLayer = null;
+const trackingDuration = 1 * 60 * 1000; // total simulation time
+const trackingJobs = {}; // keyed by orderId
+
+function initMapIfNeeded(){
+    if (map) return;
+    map = L.map('map', { zoomControl: true }).setView([HUB_COORD.lat, HUB_COORD.lng], 12);
+    tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution:'© OpenStreetMap contributors', maxZoom: 19
+    });
+    tileLayer.on('load', () => setTimeout(()=>{ try { map.invalidateSize(); } catch(e){} }, 120));
+    tileLayer.addTo(map);
+}
+
+/* show only the requested job's layers on the map to avoid multiple tracks being visible */
+function showOnlyJobOnMap(orderId){
+    // remove other jobs' layers from map (but keep them in trackingJobs)
+    Object.keys(trackingJobs).forEach(k => {
+        const job = trackingJobs[k];
+        if (!job) return;
+        if (String(k) !== String(orderId)) {
+            try {
+                if (job.marker && map.hasLayer(job.marker)) map.removeLayer(job.marker);
+                if (job.routeLine && map.hasLayer(job.routeLine)) map.removeLayer(job.routeLine);
+            } catch(e){}
+        }
+    });
+
+    // add the requested job's layers to map if present
+    const job = trackingJobs[String(orderId)];
+    if (job) {
+        try {
+            if (job.routeLine && !map.hasLayer(job.routeLine)) job.routeLine.addTo(map);
+            if (job.marker && !map.hasLayer(job.marker)) job.marker.addTo(map);
+        } catch(e){}
+    }
+}
+
+/* Open map modal: note startTracking flag only used to START the simulation (confirm uses true).
+   Opening with startTracking=false will NOT kick off a new interval (fixes bug).
+*/
+function openMapModal(order, startTracking=false){
+    document.getElementById('mapTitle').textContent = `Tracking — ${formatOrderId(order)}`;
+    document.getElementById('mapModal').classList.add('show');
+    document.getElementById('mapModal').setAttribute('aria-hidden','false');
+
+    initMapIfNeeded();
+
+    setTimeout(async () => {
+        try { map.invalidateSize(); } catch(e){}
+        await fetchBackendShipments();
+        mergeShipmentStatus();
+
+        // Determine start: prefer last backend event
+        const latestPos = await fetchLatestShipmentEvent(getOrderId(order));
+        let startPoint = HUB_COORD;
+        if (latestPos && latestPos.lat && latestPos.lng) {
+            startPoint = { lat: Number(latestPos.lat), lng: Number(latestPos.lng) };
+        }
+
+        const dest = chooseDestinationLatLng(order);
+
+        // Create/prepare job but DO NOT start interval unless startTracking === true
+        startMockRoute(startPoint, dest, order, { centerMap: true, startTracking: !!startTracking });
+
+        // Show only this order on the map (avoid showing other orders' markers)
+        const id = String(getOrderId(order));
+        showOnlyJobOnMap(id);
+
+    }, 220);
+}
+
+/* fetch latest recorded event for an order */
+async function fetchLatestShipmentEvent(orderId) {
+    try {
+        const r = await fetch(`admin_fetch_last_event.php?order_id=${orderId}`, { credentials: 'same-origin' });
+        if (!r.ok) return null;
+        const data = await r.json();
+        return data;
+    } catch(e){
+        return null;
+    }
+}
+
+/* choose destination (sets on order object if not present) */
+function chooseDestinationLatLng(order){
+    if (order.shipping_lat && order.shipping_lng) {
+        return { lat: Number(order.shipping_lat), lng: Number(order.shipping_lng) };
+    }
+    const candidates = NEGROS_CITIES.filter(c => !(Math.abs(c.lat - HUB_COORD.lat) < 0.001 && Math.abs(c.lng - HUB_COORD.lng) < 0.001));
+    const rand = candidates[Math.floor(Math.random() * candidates.length)];
+    order.shipping_lat = rand.lat;
+    order.shipping_lng = rand.lng;
+    order.shipping_city = rand.name;
+    return { lat: rand.lat, lng: rand.lng };
+}
+
+/* startMockRoute now: will prepare job (marker+route) and only start interval when options.startTracking === true OR job.interval already exists.
+   If options.startTracking is false and there is no running interval, the job will be created but not animated.
+*/
+function startMockRoute(startCoord, destCoord, orderToTrack, options = {centerMap:false, startTracking:false}) {
+    if (!map) return;
+    const orderId = String(getOrderId(orderToTrack));
+    if (!orderId) return;
+
+    // ensure job exists
+    if (!trackingJobs[orderId]) {
+        trackingJobs[orderId] = {
+            interval: null,
+            marker: null,
+            routeLine: null,
+            start: startCoord,
+            dest: destCoord,
+            startTime: null,
+            steps: Math.max(100, Math.floor(distanceMeters(startCoord, destCoord) / 50)),
+            currentStep: 0,
+            stepMs: Math.max(40, Math.floor(trackingDuration / Math.max(100, Math.floor(distanceMeters(startCoord, destCoord) / 50)))),
+            boundsApplied: false
+        };
+    } else {
+        // update start/dest if changed
+        trackingJobs[orderId].start = startCoord;
+        trackingJobs[orderId].dest = destCoord;
+        const newSteps = Math.max(100, Math.floor(distanceMeters(startCoord, destCoord) / 50));
+        trackingJobs[orderId].steps = newSteps;
+        trackingJobs[orderId].stepMs = Math.max(40, Math.floor(trackingDuration / newSteps));
+    }
+
+    const job = trackingJobs[orderId];
+
+    // create or update routeLine and marker (but do not automatically start animating)
+    const latlngs = [[job.start.lat, job.start.lng], [job.dest.lat, job.dest.lng]];
+    if (!job.routeLine) {
+        job.routeLine = L.polyline(latlngs, { color: '#3b82f6', weight: 4, dashArray: '6,6' });
+    } else {
+        job.routeLine.setLatLngs(latlngs);
+    }
+
+    if (!job.marker) {
+        job.marker = L.marker([job.start.lat, job.start.lng], { title: `Courier ${formatOrderId(orderToTrack)}` });
+    } else {
+        job.marker.setLatLng([job.start.lat, job.start.lng]);
+    }
+
+    // If the modal is visible for this order, add layers to map; otherwise keep them detached.
+    const modalVisibleForThis = document.getElementById('mapModal').classList.contains('show') &&
+                               document.getElementById('mapTitle').textContent.includes(formatOrderId(orderToTrack));
+    if (modalVisibleForThis) {
+        try { job.routeLine.addTo(map); } catch(e){}
+        try { job.marker.addTo(map); } catch(e){}
+        if (!job.boundsApplied) {
+            try { map.fitBounds(job.routeLine.getBounds().pad(0.25)); job.boundsApplied = true; } catch(e){}
+        }
+    } else {
+        // ensure other jobs are not visible when modal is closed/opening another order
+        // but do not remove job data — it's preserved for background execution
+    }
+
+    // If there's already an active interval for this job, do nothing (don't create another)
+    if (job.interval) {
+        return;
+    }
+
+    // If startTracking requested, start animation/interval. Otherwise only prepare layers.
+    if (!options.startTracking) {
+        // do not start simulation here — this fixes the bug where view map started the run
+        return;
+    }
+
+    // At this point we must start the shipment (confirm action)
+    // create shipment record and mark in_transit if backend doesn't have it yet
+    (async () => {
+        try {
+            // ensure order has dest stored
+            if (!orderToTrack.shipping_lat || !orderToTrack.shipping_lng) {
+                const d = chooseDestinationLatLng(orderToTrack);
+                job.dest = d;
+            }
+            await createShipmentAndSetShipped(orderToTrack);
+            await fetchBackendShipments();
+            mergeShipmentStatus();
+            applyFilters(false);
+        } catch(e){}
+    })();
+
+    job.startTime = Date.now();
+    job.currentStep = 0;
+
+    const eventEvery = Math.max(1, Math.floor(job.steps / 10));
+
+    job.interval = setInterval(async () => {
+        job.currentStep++;
+        const t = Math.min(1, job.currentStep / job.steps);
+        const curLat = job.start.lat + (job.dest.lat - job.start.lat) * t;
+        const curLng = job.start.lng + (job.dest.lng - job.start.lng) * t;
+
+        if (job.marker) {
+            try { job.marker.setLatLng([curLat, curLng]); } catch(e){}
+        }
+
+        // if map is visible and it's the modal for this order, keep it centered gently
+        try {
+            const mapModalVisible = document.getElementById('mapModal').classList.contains('show');
+            const title = document.getElementById('mapTitle').textContent || '';
+            if (mapModalVisible && title.includes(formatOrderId(orderToTrack))) {
+                if (job.currentStep === 1) try { map.setView([curLat, curLng]); } catch(e){}
+            }
+        } catch(e){}
+
+        // Periodic backend event logging
+        if (job.currentStep % eventEvery === 0) {
+            const payload = JSON.stringify({ order_id: getOrderId(orderToTrack), lat: curLat, lng: curLng });
+            if (navigator.sendBeacon) {
+                try { navigator.sendBeacon("admin_record_event.php", new Blob([payload], { type: "application/json" })); } catch(e){}
+            } else {
+                fetch("admin_record_event.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload })
+                    .catch(()=>{});
+            }
+        }
+
+        // Completed
+        if (t >= 1) {
+            clearInterval(job.interval);
+            job.interval = null;
+            // final event
+            try {
+                await fetch("admin_record_event.php", {
+                    method:'POST', headers:{ 'Content-Type':'application/json' },
+                    body: JSON.stringify({ order_id: getOrderId(orderToTrack), lat: job.dest.lat, lng: job.dest.lng })
+                });
+            } catch(e){}
+
+            await finalizeDelivery(orderToTrack);
+
+            orderToTrack.status = "delivered";
+            await fetchBackendShipments();
+            mergeShipmentStatus();
+            applyFilters(false);
+
+            try {
+                const currentMapTitle = document.getElementById('mapTitle');
+                if (currentMapTitle && currentMapTitle.textContent.includes(formatOrderId(orderToTrack))) {
+                    currentMapTitle.textContent = `DELIVERED — ${formatOrderId(orderToTrack)}`;
+                    const conf = document.getElementById('modalConfirmShipmentBtn');
+                    if (conf) conf.remove();
+                }
+            } catch(e){}
+            alert(`Order ${formatOrderId(orderToTrack)} marked as Delivered.`);
+        }
+
+    }, job.stepMs);
+}
+
+/* create shipment record and set shipped/in_transit */
+async function createShipmentAndSetShipped(order){
+    const orderId = getOrderId(order);
+    try {
+        const existing = backendShipments.find(s => String(s.order_id) === String(orderId));
+        if (existing && ['in_transit','out_for_delivery','delivered','returned'].includes((existing.status||'').toLowerCase())) {
+            return true;
+        }
+        const destLat = order.shipping_lat ?? null;
+        const destLng = order.shipping_lng ?? null;
+        const res = await fetch(CREATE_SHIPMENT, {
+            method:'POST', headers:{ 'Content-Type':'application/json' }, credentials:'same-origin',
+            body: JSON.stringify({ order_id: orderId, dest_lat: destLat, dest_lng: destLng })
+        });
+        const data = await res.json().catch(()=>null);
+        if (data && data.success) {
+            await fetchBackendShipments();
+            mergeShipmentStatus();
+            applyFilters(false);
+            return true;
+        }
+    } catch(e){ console.error(e); }
+    return false;
+}
+
+/* finalize delivery on backend */
+async function finalizeDelivery(order){
+    const orderId = getOrderId(order);
+    try {
+        const res = await fetch(UPDATE_SHIPMENT, {
+            method:'POST', headers:{ 'Content-Type':'application/json' }, credentials:'same-origin',
+            body: JSON.stringify({ order_id: orderId, action: 'delivered' })
+        });
+        const data = await res.json().catch(()=>null);
+        if (data && data.success) {
+            await fetch('admin_record_event.php', {
+                method:'POST', headers:{ 'Content-Type':'application/json' },
+                body: JSON.stringify({ order_id: orderId, lat: order.shipping_lat ?? null, lng: order.shipping_lng ?? null })
+            }).catch(()=>{});
+            await fetchBackendShipments();
+            mergeShipmentStatus();
+            applyFilters(false);
+            return true;
+        }
+    } catch(e){ console.error(e); }
+    return false;
+}
+
+/* confirm from details modal triggers - this is the only place that starts tracking */
+async function confirmShipment(order){
+    if (!confirm(`Confirm shipment for ${formatOrderId(order)}? This will start tracking simulation.`)) return;
+    hideDetailsModal();
+
+    const dest = chooseDestinationLatLng(order);
+
+    // Create job and start tracking (startTracking: true)
+    startMockRoute({ lat: HUB_COORD.lat, lng: HUB_COORD.lng }, { lat: dest.lat, lng: dest.lng }, order, { centerMap: true, startTracking: true });
+
+    // Immediately open modal for visual feedback
+    openMapModal(order, false); // pass false here because startMockRoute already started tracking
+}
+
+/* map modal controls */
+/* We intentionally DO NOT clear or stop tracking when user closes the modal.
+   Tracking jobs run in background until they complete. reopen to view.
+*/
+document.getElementById('closeMapBtn').onclick = () => {
+    document.getElementById('mapModal').classList.remove('show');
+    document.getElementById('mapModal').setAttribute('aria-hidden','true');
+};
+document.getElementById('cancelTrackingBtn').onclick = () => {
+    try {
+        const title = document.getElementById('mapTitle').textContent || '';
+        const match = title.match(/#(\d{1,})/);
+        if (match) {
+            const id = String(Number(match[1])).replace(/^0+/, '');
+            if (trackingJobs[id] && trackingJobs[id].interval) {
+                clearInterval(trackingJobs[id].interval);
+                trackingJobs[id].interval = null;
+                alert('Tracking canceled for order #' + id);
+            } else {
+                alert('No active tracking job for order #' + id);
+            }
+        }
+    } catch(e){}
+    document.getElementById('mapModal').classList.remove('show');
+};
+
+/* close modals by clicking backdrop */
+window.addEventListener('click', (e)=>{
+    if (e.target === detailModal) hideDetailsModal();
+    if (e.target === document.getElementById('mapModal')) {
+        document.getElementById('mapModal').classList.remove('show');
+    }
+});
+
+/* sidebar toggle */
+const managementDropdown = document.getElementById('managementDropdown');
+managementDropdown?.addEventListener('click', () => {
+    managementDropdown.classList.toggle('open');
+});
+
+/* expose applyFilters */
+window.applyFilters = applyFilters;
+
+/* Utility: Haversine distance in meters */
+function distanceMeters(a,b){
+    function toRad(v){ return v * Math.PI/180; }
+    const R = 6371000;
+    const dLat = toRad(b.lat - a.lat);
+    const dLon = toRad(b.lng - a.lng);
+    const lat1 = toRad(a.lat);
+    const lat2 = toRad(b.lat);
+    const sinDLat = Math.sin(dLat/2);
+    const sinDLon = Math.sin(dLon/2);
+    const aa = sinDLat*sinDLat + sinDLon*sinDLon * Math.cos(lat1) * Math.cos(lat2);
+    const c = 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1-aa));
+    return R * c;
+}
+</script>
+
+</body>
+</html>

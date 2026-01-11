@@ -1,0 +1,656 @@
+<!-- save as admin_shipment_full.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tropicart Admin - Shipment Management</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/feather-icons"></script>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+/* (trimmed for brevity) - keep your CSS from original file */
+:root{--sidebar-bg:#fff;--page-bg:#eee;--card-bg:#fff;--text-dark:#222;--text-muted:#6c6c6c;--border:#e5e5e5;--radius:12px;--primary-color:#333;--hover:#f4f4f4;--modal-backdrop: rgba(0,0,0,0.4);--modal-background:#F8F9FA;--modal-border:#E0E0E0;--shadow: 0 4px 12px rgba(0,0,0,0.05);--shadow-hover: 0 6px 15px rgba(0,0,0,0.06);}*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}body{display:flex;height:100vh;background:var(--page-bg);color:var(--text-dark);overflow:hidden;}a{color:inherit;text-decoration:none;}aside.sidebar{width:220px;background:var(--sidebar-bg);padding:20px;box-shadow:2px 0 10px rgba(0,0,0,0.05);overflow:auto}.sidebar-logo{font-size:1.3rem;font-weight:700;color:var(--primary-color);margin-bottom:18px}.sidebar-nav ul{list-style:none;display:flex;flex-direction:column;gap:8px;padding-left:0}.sidebar-nav a,.sidebar-nav button.nav-item{display:flex;align-items:center;padding:10px;border-radius:10px;color:var(--text-muted);background:none;border:none;width:100%;text-align:left;cursor:pointer}.sidebar-nav a:hover:not(.active),.sidebar-nav button.nav-item:hover:not(.open){background:var(--hover);color:var(--text-dark)}.sidebar-nav a.active,.sidebar-nav button.nav-item.open{background:#eaeaea;color:var(--primary-color);font-weight:600}.divider{width:100%;height:1px;background:var(--border);margin:12px 0}.main-container{flex:1;display:flex;flex-direction:column;overflow:auto}header.top-header{background:var(--card-bg);padding:14px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}.header-title{font-size:1.2rem;font-weight:600}.user-profile{display:flex;align-items:center;gap:10px}.content-area{padding:20px}.stats-container{display:flex;gap:12px;background:var(--card-bg);padding:14px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:16px;align-items:center}.card{background:var(--card-bg);border-radius:var(--radius);padding:18px;border:1px solid var(--border);box-shadow:var(--shadow)}.controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px;flex-wrap:wrap}.search-input,.filter-select{padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:0.95rem}.search-input{width:320px}.table-scroll{overflow:auto}.order-table{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:0.95rem;text-align:left}.order-table thead th{padding:10px 12px;color:var(--text-muted);text-transform:uppercase;font-size:0.75rem;letter-spacing:0.04em}.order-table td{background:var(--card-bg);padding:12px;border-bottom:1px solid transparent;vertical-align:middle;box-shadow:0 1px 3px rgba(0,0,0,0.03)}.order-table tbody tr:nth-child(odd){background:#fbfbfb}.badge{padding:6px 10px;border-radius:9999px;font-weight:600;font-size:0.82rem;display:inline-block}.badge-packed{background:#eff6ff;color:#1d4ed8}.badge-in_transit{background:#fff7ed;color:#c2410c}.badge-out_for_delivery{background:#fefce8;color:#854d0e}.badge-delivered{background:#f0fdf4;color:#16a34a}.update-dropdown{padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600;margin-left:8px}.modal{display:none;position:fixed;inset:0;background:var(--modal-backdrop);justify-content:center;align-items:center;z-index:999}.modal.show{display:flex}.modal-content{background:var(--modal-background);padding:0;border-radius:12px;width:95%;max-width:1000px;max-height:90vh;overflow:hidden;border:1px solid var(--modal-border);box-shadow:var(--shadow-hover);display:flex;flex-direction:column}#map{flex:1;height:100%;min-height:450px;border-radius:0 0 12px 12px}.map-header{padding:12px 16px;background:#fff;border-bottom:1px solid var(--modal-border);display:flex;justify-content:space-between;align-items:center}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">Tropicart</div>
+  <nav class="sidebar-nav">
+    <ul>
+      <li><a class="active" href="#"><i data-feather="truck"></i>&nbsp;Shipment</a></li>
+    </ul>
+    <div class="divider"></div>
+    <ul>
+      <li><a href="#"><i data-feather="file-text"></i>&nbsp;Reports</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<div class="main-container">
+  <header class="top-header">
+    <div class="header-title">Shipment Management — Order Shipments</div>
+    <div class="user-profile">
+      <span id="shipCountDisplay" class="muted">0 Shipments</span>
+      <img src="https://via.placeholder.com/40x40/00796b/ffffff?text=AU" alt="Admin">
+    </div>
+  </header>
+
+  <div class="content-area">
+    <div class="stats-container" id="shipStatsContainer"></div>
+
+    <div class="card">
+      <div class="controls">
+        <div class="controls-left">
+          <input id="searchBox" class="search-input" placeholder="Search by name or ID...">
+          <select id="filterStatus" class="filter-select">
+            <option value="all">Filter by Status (All)</option>
+            <option value="processing">Processing</option>
+            <option value="packed">Packed</option>
+            <option value="in_transit">In Transit</option>
+            <option value="out_for_delivery">Out for Delivery</option>
+            <option value="delivered">Delivered</option>
+            <option value="returned">Returned</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="order-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer Name</th>
+              <th>Date</th>
+              <th>Courier</th>
+              <th>Status</th>
+              <th style="text-align:right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="shipTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Details modal -->
+<div id="shipDetailModal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #e6e6e6">
+      <h2 id="modalShipTitle">Shipment Details</h2>
+      <button id="closeModalBtn" style="font-size:22px;border:none;background:none;cursor:pointer;">&times;</button>
+    </div>
+    <div id="modalShipDetails" style="padding:18px;overflow:auto"></div>
+  </div>
+</div>
+
+<!-- Map modal -->
+<div id="mapModal" class="modal" aria-hidden="true">
+  <div class="modal-content" style="width:95%;max-width:1100px;height:80vh;display:flex;flex-direction:column">
+    <div class="map-header">
+      <div><strong id="mapTitle">Tracking — Order #0000</strong></div>
+      <div>
+        <button id="confirmCreateShipmentBtn" class="update-dropdown" style="background:#1f9d55;color:#fff;border:none;margin-right:8px">Confirm Shipment</button>
+        <button id="closeMapBtn" class="update-dropdown">Close</button>
+      </div>
+    </div>
+    <div id="map" style="flex:1"></div>
+  </div>
+</div>
+
+<script>
+/* ===== Full shipment JS (replace previous) ===== */
+
+/*
+  IMPORTANT:
+  - Set the endpoints below to match your PHP filenames.
+  - Expected behavior:
+    FETCH_ORDERS returns array of orders (from `orders` table) — we will show processing/packed by default.
+    FETCH_SHIPMENTS returns array of shipments (from `order_shipment`).
+    CREATE_SHIPMENT expects POST {order_id,dest_lat,dest_lng} -> returns {success:true, shipment_id:...}
+    RECORD_EVENT expects POST {order_id, lat, lng} -> writes to shipment_events
+    UPDATE_SHIPMENT expects POST {order_id, action:'delivered', lat, lng} -> updates order_shipment
+*/
+
+/* endpoints - update if your php filenames differ */
+const FETCH_ORDERS = 'admin_fetch_order_ships.php';      // returns orders array
+const FETCH_SHIPMENTS = 'admin_fetch_shipments.php';     // returns order_shipment array
+const CREATE_SHIPMENT = 'admin_create_shipment.php';
+const RECORD_EVENT = 'admin_record_event.php';
+const UPDATE_SHIPMENT = 'admin_update_shipment.php';
+
+/* Warehouse hub (SM) */
+const HUB_COORD = { lat: 10.683100, lng: 122.956300 };
+
+/* UI state */
+let allShipments = [];       // orders from DB
+let backendShipments = [];   // order_shipment rows from DB
+let displayed = [];
+let currentPage = 1;
+const rowsPerPage = 20;
+
+/* Map + tracking state */
+let map = null;
+let tileLayer = null;
+let courierMarker = null;
+let routeLine = null;
+let trackingInterval = null;
+let routeMetrics = null;
+let backendPollInterval = null;
+const POLL_MS = 2000;
+
+/* helpers */
+function money(n){ return '₱' + Number(n||0).toFixed(2); }
+function getOrderId(o){ return o.orders_id ?? o.order_id ?? o.id ?? null; }
+function formatOrderId(o){ const id=getOrderId(o); return id?('#'+String(id).padStart(4,'0')):'#0000'; }
+function safe(s){ return s==null ? 'N/A' : String(s); }
+
+async function initializeShipment(){
+  try {
+    const res = await fetch(FETCH_ORDERS, { credentials:'same-origin' });
+    if (!res.ok) throw new Error('FETCH_ORDERS not ok: ' + res.status);
+    const orders = await res.json();
+    if (!Array.isArray(orders)) throw new Error('FETCH_ORDERS response is not an array');
+    allShipments = orders;
+    await refreshBackendShipments();
+    mergeShipmentStatus();
+    applyFilters(true); // initialLoad -> show processing/packed
+    console.info('Loaded orders:', allShipments.length, 'shipments:', backendShipments.length);
+  } catch (err) {
+    console.error('initializeShipment failed', err);
+    document.getElementById('shipTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Failed to load orders. Check console for details.</td></tr>`;
+  }
+}
+
+async function refreshBackendShipments(){
+  try {
+    const r = await fetch(FETCH_SHIPMENTS, { credentials:'same-origin' });
+    if (!r.ok) throw new Error('FETCH_SHIPMENTS not ok: ' + r.status);
+    const j = await r.json();
+    backendShipments = Array.isArray(j) ? j : [];
+  } catch (e) {
+    console.warn('refreshBackendShipments failed', e);
+    backendShipments = [];
+  }
+}
+
+/* merge shipment rows into the orders array so UI can show status and coords */
+function mergeShipmentStatus(){
+  // create quick lookup map of latest shipment per order_id (highest shipment_id)
+  const mapLatest = {};
+  backendShipments.forEach(s => {
+    const oid = String(s.order_id);
+    if (!mapLatest[oid] || Number(s.shipment_id) > Number(mapLatest[oid].shipment_id)) mapLatest[oid] = s;
+  });
+  allShipments.forEach(o => {
+    const oid = String(getOrderId(o));
+    const sh = mapLatest[oid] || null;
+    o._backend = sh;
+    if (sh) {
+      let st = (sh.status || 'pending').toString().toLowerCase();
+      if (st === 'shipped') st = 'in_transit';
+      o.status = st;
+      if (sh.dest_lat) o.shipping_lat = sh.dest_lat;
+      if (sh.dest_lng) o.shipping_lng = sh.dest_lng;
+      if (sh.current_lat) o.current_lat = sh.current_lat;
+      if (sh.current_lng) o.current_lng = sh.current_lng;
+      o.shipment_id = sh.shipment_id;
+    } else {
+      // ensure orders with no shipment show their original order status
+      o.status = (o.status || o.order_status || 'processing').toString().toLowerCase();
+    }
+  });
+}
+
+/* UI renderers */
+function renderStats(){
+  const container = document.getElementById('shipStatsContainer');
+  const byStatus = { processing:0, packed:0, in_transit:0, out_for_delivery:0, delivered:0, returned:0, pending:0 };
+  allShipments.forEach(s => {
+    let st = (s.status || 'processing').toString().toLowerCase();
+    if (st === 'shipped') st = 'in_transit';
+    if (byStatus[st] !== undefined) byStatus[st]++;
+  });
+  const data = [
+    {label:'Processing/Packed', value:(byStatus.processing + byStatus.packed)},
+    {label:'In Transit', value:byStatus.in_transit},
+    {label:'Out For Delivery', value:byStatus.out_for_delivery},
+    {label:'Delivered', value:byStatus.delivered}
+  ];
+  document.getElementById('shipCountDisplay').textContent = displayed.length + ' Shipments';
+  container.innerHTML = data.map(d => `<div class="stat-card"><div class="stat-content"><div class="stat-value">${d.value}</div><div class="stat-label">${d.label}</div></div></div>`).join('');
+}
+
+function updatePagination(){
+  const total = displayed.length;
+  const totalPages = Math.max(1, Math.ceil(total/rowsPerPage));
+  // (we don't show pagination controls in this version except counts)
+  const start = total === 0 ? 0 : 1;
+  const end = Math.min(rowsPerPage, total);
+  document.getElementById('paginationInfo')?.textContent = total ? `Showing ${start}-${end} of ${total} shipments` : 'No shipments';
+}
+
+function renderTable(){
+  const tbody = document.getElementById('shipTableBody');
+  tbody.innerHTML = '';
+  if (!displayed.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">No shipments to display.</td></tr>`;
+    renderStats();
+    return;
+  }
+
+  displayed.forEach(o => {
+    const orderId = getOrderId(o);
+    let status = (o.status||'processing').toString().toLowerCase();
+    if (status === 'shipped') status = 'in_transit';
+    const badgeClass = 'badge-' + status.replace(/\s+/g,'_');
+    const date = safe(o.order_date ?? o.created_at ?? '');
+    const courier = safe(o.courier ?? 'Tropicart');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${formatOrderId(o)}</td>
+      <td>${safe(o.customer_name)}</td>
+      <td>${date}</td>
+      <td>${courier}</td>
+      <td style="text-align:center"><span class="badge ${badgeClass}">${status.replace(/_/g,' ')}</span></td>
+      <td style="text-align:right">
+        <div class="actions-container">
+          <button class="update-dropdown" data-order='${orderId}' data-action="details" title="View details"><i data-feather="eye"></i></button>
+          <button class="update-dropdown" data-order='${orderId}' data-action="track" title="Track / Map"><i data-feather="map-pin"></i></button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  feather.replace();
+
+  tbody.querySelectorAll('button').forEach(btn => {
+    const action = btn.dataset.action;
+    const oid = btn.dataset.order;
+    const orderObj = allShipments.find(x => String(getOrderId(x)) === String(oid));
+    if (!orderObj) return;
+    if (action === 'details') btn.onclick = () => openDetailsModal(orderObj);
+    if (action === 'track') btn.onclick = () => openMapModal(orderObj, false); // do not auto-start tracking
+  });
+
+  renderStats();
+}
+
+/* filters */
+document.getElementById('searchBox').addEventListener('input', () => applyFilters(false));
+document.getElementById('filterStatus').addEventListener('change', () => applyFilters(false));
+function applyFilters(initialLoad=false){
+  const q = document.getElementById('searchBox').value.toLowerCase().trim();
+  const f = document.getElementById('filterStatus').value;
+
+  let filtered = allShipments.filter(s => {
+    const orderId = String(getOrderId(s) ?? '').toLowerCase();
+    let status = (s.status||'').toString().toLowerCase();
+    if (status === 'shipped') status = 'in_transit';
+    const matchesSearch = (!q) || orderId.includes(q) || ((s.customer_name||'').toLowerCase().includes(q));
+    let matchesFilter = f === 'all' || (status === f);
+    if (initialLoad) matchesFilter = (status === 'processing' || status === 'packed' || status === '');
+    return matchesSearch && matchesFilter;
+  });
+
+  displayed = filtered;
+  currentPage = 1;
+  renderTable();
+  updatePagination();
+}
+
+/* Details modal */
+const detailModal = document.getElementById('shipDetailModal');
+const modalTitle = document.getElementById('modalShipTitle');
+const modalDetails = document.getElementById('modalShipDetails');
+function openDetailsModal(order){
+  modalTitle.textContent = `Order ${formatOrderId(order)} Details`;
+  const items = Array.isArray(order.items) ? order.items : (order.order_items ?? []);
+  let status = (order.status||'processing').toString().toLowerCase();
+  if (status === 'shipped') status = 'in_transit';
+  modalDetails.innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:280px">
+        <h3>Customer Info</h3>
+        <p><strong>Name:</strong> ${safe(order.customer_name)}</p>
+        <p><strong>Email:</strong> ${safe(order.customer_email ?? 'N/A')}</p>
+        <p><strong>Phone:</strong> ${safe(order.customer_phone ?? 'N/A')}</p>
+        <p><strong>Address:</strong> ${safe(order.shipping_address)}</p>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <h3>Summary</h3>
+        <p><strong>Subtotal:</strong> ${money(order.subtotal ?? order.sub_total ?? 0)}</p>
+        <p><strong>Shipping:</strong> ${money(order.shipping_fee ?? 0)}</p>
+        <p><strong>Total:</strong> ${money(order.total ?? order.total_amount ?? 0)}</p>
+        <p><strong>Status:</strong> <span class="badge ${'badge-'+status.replace(/_/g,'_')}">${status.replace(/_/g,' ')}</span></p>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <h3>Items</h3>
+      <ul style="padding-left:20px;margin-top:8px">
+        ${items.map(it => `<li>${(it.quantity||it.qty||1)} × ${safe(it.product_name||it.name)} — ${money(it.price_at_time ?? it.price ?? 0)}</li>`).join('')}
+      </ul>
+    </div>
+  `;
+  detailModal.classList.add('show'); detailModal.setAttribute('aria-hidden','false');
+}
+document.getElementById('closeModalBtn').onclick = () => { detailModal.classList.remove('show'); detailModal.setAttribute('aria-hidden','true'); };
+
+/* ---------- Leaflet helpers ---------- */
+async function getRoadRoute(start, dest){
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('OSRM fail ' + res.status);
+    const data = await res.json();
+    if (!data.routes || !data.routes.length) throw new Error('No route');
+    return data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+  } catch (e) {
+    console.warn('OSRM failed, fallback straight line', e);
+    return [[start.lat, start.lng], [dest.lat, dest.lng]];
+  }
+}
+function haversineDistance(lat1, lon1, lat2, lon2){
+  const R = 6371000; const toRad = v => v * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1); const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); return R * c;
+}
+function computeRouteMetrics(points){
+  const segLengths = []; let total = 0;
+  for (let i=0;i<points.length-1;i++){ const a = points[i], b = points[i+1]; const d = haversineDistance(a[0], a[1], b[0], b[1]); segLengths.push(d); total += d; }
+  return { points, segLengths, totalLength: total };
+}
+function positionAlongRoute(metrics, t){
+  if (!metrics || metrics.totalLength === 0) return metrics?.points?.[0] || [HUB_COORD.lat,HUB_COORD.lng];
+  const target = t * metrics.totalLength; let cum = 0;
+  for (let i=0;i<metrics.segLengths.length;i++){
+    const seg = metrics.segLengths[i];
+    if (cum + seg >= target){
+      const remain = target - cum; const ratio = seg === 0 ? 0 : (remain / seg);
+      const p1 = metrics.points[i], p2 = metrics.points[i+1];
+      const lat = p1[0] + (p2[0]-p1[0])*ratio; const lng = p1[1] + (p2[1]-p1[1])*ratio;
+      return [lat, lng];
+    }
+    cum += seg;
+  }
+  return metrics.points[metrics.points.length-1];
+}
+function initMapIfNeeded(){
+  if (map) return;
+  map = L.map('map', { zoomControl:true }).setView([HUB_COORD.lat, HUB_COORD.lng], 12);
+  tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' });
+  tileLayer.addTo(map);
+  setTimeout(()=>{ try { map.invalidateSize(true); } catch(e){} }, 120);
+}
+
+/* Destination selection (randomized within Negros) */
+const CITY_COORDS = {
+  'bacolod': { lat: 10.6831, lng: 122.9563, radius: 0.02 },
+  'talisay': { lat: 10.6539, lng: 122.9483, radius: 0.015 },
+  'silay':  { lat: 10.8454, lng: 122.9566, radius: 0.02 },
+  'bago':   { lat: 10.6769, lng: 122.8244, radius: 0.02 },
+};
+function chooseDestinationLatLng(order){
+  if (order.shipping_lat && order.shipping_lng) return { lat: Number(order.shipping_lat), lng: Number(order.shipping_lng) };
+  const city = (order.shipping_city||'').toLowerCase();
+  for (const key of Object.keys(CITY_COORDS)) {
+    if (city.includes(key)) {
+      const base = CITY_COORDS[key];
+      return { lat: base.lat + (Math.random() - 0.5) * base.radius, lng: base.lng + (Math.random() - 0.5) * base.radius };
+    }
+  }
+  return { lat: HUB_COORD.lat + (Math.random()-0.5)*0.03, lng: HUB_COORD.lng + (Math.random()-0.5)*0.03 };
+}
+
+/* ---------- Create shipment (persist) ---------- */
+async function createShipmentAndSetShipped(order, dest){
+  const orderId = getOrderId(order);
+  try {
+    const res = await fetch(CREATE_SHIPMENT, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      credentials: 'same-origin',
+      body: JSON.stringify({ order_id: orderId, dest_lat: dest.lat, dest_lng: dest.lng })
+    });
+    if (!res.ok) throw new Error('create shipment network ' + res.status);
+    const j = await res.json().catch(()=>null);
+    if (j && (j.success === true) && (j.shipment_id || j.shipment_id === 0)) {
+      await refreshBackendShipments();
+      // attach latest shipment row for this order
+      const attached = backendShipments.filter(s=>String(s.order_id)===String(orderId)).sort((a,b)=>b.shipment_id - a.shipment_id)[0] || null;
+      if (attached) {
+        order._backend = attached;
+        if (attached.dest_lat) order.shipping_lat = attached.dest_lat;
+        if (attached.dest_lng) order.shipping_lng = attached.dest_lng;
+        if (attached.current_lat) order.current_lat = attached.current_lat;
+        if (attached.current_lng) order.current_lng = attached.current_lng;
+      }
+      mergeShipmentStatus(); applyFilters(false);
+      return attached;
+    } else {
+      console.warn('createShipment returned unexpected payload', j);
+      return null;
+    }
+  } catch (e) {
+    console.warn('createShipment error', e);
+    return null;
+  }
+}
+
+/* ---------- Event recording ---------- */
+function sendEvent(order, lat, lng){
+  const payload = JSON.stringify({ order_id: getOrderId(order), lat: lat, lng: lng });
+  // prefer sendBeacon for background reliability
+  if (navigator.sendBeacon) {
+    try { navigator.sendBeacon(RECORD_EVENT, new Blob([payload], { type:'application/json' })); return; } catch(e){}
+  }
+  fetch(RECORD_EVENT, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: payload }).catch(()=>{});
+}
+
+/* ---------- Finalize delivery ---------- */
+async function finalizeDelivery(order){
+  const orderId = getOrderId(order);
+  try {
+    const res = await fetch(UPDATE_SHIPMENT, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      credentials:'same-origin',
+      body: JSON.stringify({ order_id: orderId, action: 'delivered', lat: order.shipping_lat, lng: order.shipping_lng })
+    });
+    if (!res.ok) throw new Error('finalize network ' + res.status);
+    const j = await res.json().catch(()=>null);
+    if (j && j.success) {
+      await refreshBackendShipments();
+      mergeShipmentStatus();
+      order.status = 'delivered';
+      if (order._backend) order._backend.status = 'delivered';
+      applyFilters(false);
+      return true;
+    } else {
+      console.warn('finalizeDelivery replied', j);
+    }
+  } catch(e){ console.warn('finalizeDelivery error', e); }
+  return false;
+}
+
+/* ---------- Poll backend for live updates for single order (used when viewing a tracked shipment) ---------- */
+function startBackendPollForOrder(order){
+  stopBackendPoll();
+  backendPollInterval = setInterval(async () => {
+    try {
+      await refreshBackendShipments();
+      mergeShipmentStatus();
+      const s = backendShipments.find(x => String(x.order_id) === String(getOrderId(order)));
+      if (s && s.current_lat && s.current_lng) {
+        const lat = Number(s.current_lat), lng = Number(s.current_lng);
+        if (!map) initMapIfNeeded();
+        if (!courierMarker) courierMarker = L.marker([lat, lng], { title:'Courier' }).addTo(map);
+        else courierMarker.setLatLng([lat, lng]);
+        if (routeLine) try { map.panTo([lat, lng], { animate:false }); } catch(e){}
+        if ((s.status||'').toString().toLowerCase() === 'delivered') {
+          stopBackendPoll();
+          order.status = 'delivered';
+          if (order._backend) order._backend.status = 'delivered';
+          applyFilters(false);
+          document.getElementById('mapTitle').textContent = `DELIVERED — ${formatOrderId(order)}`;
+          alert(`Order ${formatOrderId(order)} marked as Delivered.`);
+        }
+      }
+    } catch(e) { console.warn('poll error', e); }
+  }, POLL_MS);
+}
+function stopBackendPoll(){ if (backendPollInterval) { clearInterval(backendPollInterval); backendPollInterval = null; } }
+
+/* ---------- display route only (static) ---------- */
+async function displayRouteOnly(startCoord, destCoord){
+  if (!map) initMapIfNeeded();
+  if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+  if (courierMarker) { map.removeLayer(courierMarker); courierMarker = null; }
+  const roadPoints = await getRoadRoute(startCoord, destCoord);
+  routeLine = L.polyline(roadPoints, { weight:4 }).addTo(map);
+  courierMarker = L.marker(roadPoints[0], { title:'Planned Courier' }).addTo(map);
+  try { map.fitBounds(routeLine.getBounds().pad(0.25)); } catch(e){}
+}
+
+/* ---------- animate mock route and optionally persist events to DB ---------- */
+async function startMockRoute(startCoord, destCoord, orderToTrack=null){
+  if (!map) return;
+  // clean up any existing animation
+  if (trackingInterval) { clearInterval(trackingInterval); trackingInterval = null; }
+  if (routeLine) { try { map.removeLayer(routeLine); } catch(e){} routeLine = null; }
+  if (courierMarker) { try { map.removeLayer(courierMarker); } catch(e){} courierMarker = null; }
+
+  const roadPoints = await getRoadRoute(startCoord, destCoord);
+  routeLine = L.polyline(roadPoints, { weight:4 }).addTo(map);
+  courierMarker = L.marker(roadPoints[0], { title:'Courier' }).addTo(map);
+  routeMetrics = computeRouteMetrics(roadPoints);
+  try { map.fitBounds(routeLine.getBounds().pad(0.25)); } catch(e){}
+
+  // If this is a tracked order, ensure a shipment DB row exists BEFORE sending events
+  if (orderToTrack && (!orderToTrack._backend || !orderToTrack._backend.shipment_id)) {
+    const attached = await createShipmentAndSetShipped(orderToTrack, destCoord);
+    if (!attached) { alert('Failed to create shipment. Aborting simulation.'); return; }
+  }
+
+  // start backend poll as well if tracked
+  if (orderToTrack) startBackendPollForOrder(orderToTrack);
+
+  const duration = 60000; // 60s animation
+  const tickMs = 200;
+  const totalSteps = Math.max(5, Math.floor(duration / tickMs));
+  let step = 0;
+  const sendEvery = Math.max(1, Math.floor(2000 / tickMs)); // ~2s
+
+  trackingInterval = setInterval(async () => {
+    step++;
+    const t = Math.min(1, step / totalSteps);
+    const pos = positionAlongRoute(routeMetrics, t);
+    if (courierMarker) courierMarker.setLatLng(pos);
+    if (step % 5 === 0) try { map.panTo(pos, { animate:false }); } catch(e){}
+    if (orderToTrack && (step % sendEvery === 0)) {
+      sendEvent(orderToTrack, pos[0], pos[1]);
+    }
+    if (t >= 1) {
+      clearInterval(trackingInterval); trackingInterval = null;
+      if (courierMarker) courierMarker.setLatLng([destCoord.lat, destCoord.lng]);
+      document.getElementById('mapTitle').textContent = `DELIVERED — ${formatOrderId(orderToTrack || { orders_id: '0000' })}`;
+      if (orderToTrack) {
+        sendEvent(orderToTrack, destCoord.lat, destCoord.lng);
+        const ok = await finalizeDelivery(orderToTrack);
+        if (ok) {
+          orderToTrack.status = 'delivered';
+          if (orderToTrack._backend) orderToTrack._backend.status = 'delivered';
+          applyFilters(false);
+        }
+      }
+      try { alert(`Order ${formatOrderId(orderToTrack)} marked as Delivered.`); } catch(e){}
+    }
+  }, tickMs);
+}
+
+/* ---------- open Map modal ---------- */
+let currentMapOrder = null;
+document.getElementById('confirmCreateShipmentBtn').onclick = async () => {
+  if (!currentMapOrder) return alert('No order selected.');
+  // Confirm will create shipment (if not exists) and start simulation with DB events
+  const dest = chooseDestinationLatLng(currentMapOrder);
+  currentMapOrder.shipping_lat = dest.lat; currentMapOrder.shipping_lng = dest.lng;
+  const attached = await createShipmentAndSetShipped(currentMapOrder, dest);
+  if (!attached) return alert('Failed to create shipment');
+  // start tracked simulation (writes events/finalizes)
+  startMockRoute(HUB_COORD, dest, currentMapOrder);
+};
+
+function openMapModal(order, startTracking=false){
+  currentMapOrder = order;
+  document.getElementById('mapTitle').textContent = `Tracking — ${formatOrderId(order)}`;
+  document.getElementById('mapModal').classList.add('show');
+  document.getElementById('mapModal').setAttribute('aria-hidden','false');
+  initMapIfNeeded();
+  // small delay for modal/layout
+  setTimeout(async () => {
+    try { map.invalidateSize(true); } catch(e){}
+    await refreshBackendShipments();
+    mergeShipmentStatus();
+    const dest = chooseDestinationLatLng(order);
+    order.shipping_lat = dest.lat; order.shipping_lng = dest.lng;
+
+    const shipment = backendShipments.find(s => String(s.order_id) === String(getOrderId(order)));
+    if (!startTracking) {
+      // if backend shipment exists -> show current position and start DB polling
+      if (shipment) {
+        const curLat = shipment.current_lat ? Number(shipment.current_lat) : Number(shipment.warehouse_lat);
+        const curLng = shipment.current_lng ? Number(shipment.current_lng) : Number(shipment.warehouse_lng);
+        const roadPoints = await getRoadRoute(HUB_COORD, { lat: Number(shipment.dest_lat) || dest.lat, lng: Number(shipment.dest_lng) || dest.lng });
+        if (routeLine) { try { map.removeLayer(routeLine); } catch(e){} routeLine = null; }
+        routeLine = L.polyline(roadPoints, { weight:4 }).addTo(map);
+        if (courierMarker) courierMarker.setLatLng([curLat, curLng]); else courierMarker = L.marker([curLat, curLng], { title:'Courier' }).addTo(map);
+        try { map.fitBounds(routeLine.getBounds().pad(0.25)); } catch(e){}
+        startBackendPollForOrder(order);
+      } else {
+        // no backend shipment: display planned route and do NOT persist any events
+        await displayRouteOnly(HUB_COORD, dest);
+      }
+      return;
+    }
+
+    // if startTracking === true: create DB row if needed and start mock route that writes events
+    startMockRoute(HUB_COORD, dest, startTracking ? order : null);
+  }, 220);
+}
+
+/* close map & cancel animation / polling */
+document.getElementById('closeMapBtn').onclick = () => {
+  document.getElementById('mapModal').classList.remove('show');
+  document.getElementById('mapModal').setAttribute('aria-hidden','true');
+  if (trackingInterval) { clearInterval(trackingInterval); trackingInterval = null; }
+  stopBackendPoll();
+  currentMapOrder = null;
+};
+
+/* close map by backdrop (also clear) */
+window.addEventListener('click', (e) => {
+  const mapModal = document.getElementById('mapModal');
+  if (e.target === mapModal) {
+    mapModal.classList.remove('show');
+    if (trackingInterval) { clearInterval(trackingInterval); trackingInterval = null; }
+    stopBackendPoll();
+    currentMapOrder = null;
+  }
+});
+
+/* init */
+initializeShipment();
+
+</script>
+</body>
+</html>

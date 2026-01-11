@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Receipt</title>
+
+    <style>
+        body {
+            font-family: "Poppins", sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .order-receipt-container {
+            max-width: 650px;
+            background: #ffffff;
+            margin: 40px auto;
+            padding: 30px 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: fadeIn 0.4s ease;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            color: #2b8f65;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            margin-top: 25px;
+            font-size: 20px;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        p {
+            font-size: 15px;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        #orderDetails p strong {
+            color: #222;
+        }
+
+        .order-items {
+            background: #f9f9f9;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .order-items li {
+            padding: 6px 0;
+            border-bottom: 1px solid #ececec;
+            font-size: 15px;
+        }
+
+        .order-items li:last-child {
+            border-bottom: none;
+        }
+
+        .receipt-buttons {
+            margin-top: 25px;
+            text-align: center;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+        #continueShopping {
+            background: #2b8f65;
+            color: white;
+        }
+
+        #continueShopping:hover {
+            background: #247956;
+        }
+
+        #viewOrders {
+            background: #444;
+            color: white;
+        }
+
+        #viewOrders:hover {
+            background: #222;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="order-receipt-container">
+        <h1>Order Pending!</h1>
+        <p style="text-align:center;">Thank you for your purchase. Your order has been successfully placed.</p>
+
+        <h2>Order Details (Order #<span id="orderId"></span>)</h2>
+        <div id="orderDetails"></div>
+
+        <div class="receipt-buttons">
+            <button id="continueShopping">Continue Shopping</button>
+            <button id="viewOrders">View My Orders</button>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order_id');
+        document.getElementById('orderId').innerText = orderId;
+
+        async function fetchOrderDetails(id) {
+            try {
+                const res = await fetch(`get_order_details.php?order_id=${id}`, { credentials: 'same-origin' });
+                if (!res.ok) throw new Error('Failed');
+
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || 'No details');
+
+                const container = document.getElementById('orderDetails');
+
+                container.innerHTML = `
+                    <p><strong>Name:</strong> ${data.order.customer_name}</p>
+                    <p><strong>Email:</strong> ${data.order.customer_email}</p>
+                    <p><strong>Phone:</strong> ${data.order.customer_phone}</p>
+                    <p><strong>Delivery Type:</strong> ${data.order.delivery_type}</p>
+                    <p><strong>Address:</strong> ${data.order.shipping_address}, ${data.order.shipping_city} ${data.order.shipping_zip}</p>
+                    <p><strong>Payment Method:</strong> ${data.order.payment_method.toUpperCase()}</p>
+
+                    <p><strong>Subtotal:</strong> ₱${parseFloat(data.order.subtotal).toFixed(2)}</p>
+                    <p><strong>Shipping Fee:</strong> ₱${parseFloat(data.order.shipping_fee).toFixed(2)}</p>
+                    <p><strong>Discount:</strong> ₱${parseFloat(data.order.discount_amount).toFixed(2)}</p>
+                    <p><strong style="font-size:18px;">Total: ₱${parseFloat(data.order.total_amount).toFixed(2)}</strong></p>
+
+                    <h3 style="margin-top:20px;">Items:</h3>
+                    <ul class="order-items">
+                        ${data.items
+                            .map(item => `<li>${item.product_name} × ${item.quantity} — ₱${(item.quantity * item.price_at_time).toFixed(2)}</li>`)
+                            .join('')}
+                    </ul>
+                `;
+            } catch (err) {
+                document.getElementById('orderDetails').innerHTML =
+                    `<p style="color:red;">Failed to load order details</p>`;
+            }
+        }
+
+        if (orderId) fetchOrderDetails(orderId);
+
+        document.getElementById('continueShopping').onclick = () => {
+            window.location.href = 'user_product_page.html';
+        };
+
+        document.getElementById('viewOrders').onclick = () => {
+            window.location.href = 'user_view_order.html';
+        };
+    </script>
+
+</body>
+</html>

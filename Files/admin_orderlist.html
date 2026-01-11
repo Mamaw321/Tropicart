@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Tropicart Admin - Order Management</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/feather-icons"></script>
+
+<!-- Combined / adapted styles from your admin_addproduct design -->
+<style>
+:root{
+    --sidebar-bg:#ffffff;
+    --page-bg:#eeeeee;
+    --card-bg:#ffffff;
+    --text-dark:#222;
+    --text-muted:#6c6c6c;
+    --border:#e5e5e5;
+    --radius:12px;
+    --primary-color:#333;
+    --accent-color:#555;
+    --hover:#f4f4f4;
+    --modal-backdrop: rgba(0,0,0,0.4);
+    --modal-background:#F8F9FA;
+    --modal-card-bg:#FFFFFF;
+    --modal-border:#E0E0E0;
+    --shadow: 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-hover: 0 6px 15px rgba(0,0,0,0.06);
+}
+
+/* base */
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+body{display:flex;height:100vh;background:var(--page-bg);color:var(--text-dark);overflow:hidden;}
+a{color:inherit;text-decoration:none;}
+
+/* SIDEBAR (adapted) */
+aside.sidebar{
+    width:220px;
+    background:var(--sidebar-bg);
+    padding:20px;
+    box-shadow:2px 0 10px rgba(0,0,0,0.05);
+    overflow:auto;
+}
+.sidebar-logo{font-size:1.3rem;font-weight:700;color:var(--primary-color);margin-bottom:18px;}
+.sidebar-nav ul{list-style:none;display:flex;flex-direction:column;gap:8px;padding-left:0;}
+.sidebar-nav a, .sidebar-nav button.nav-item {
+    display:flex; align-items:center; padding:10px; border-radius:10px; color:var(--text-muted); 
+    background:none;border:none; width:100%; text-align:left; cursor:pointer;
+}
+.sidebar-nav a:hover:not(.active), .sidebar-nav button.nav-item:hover:not(.open){
+    background:var(--hover); color:var(--text-dark);
+}
+.sidebar-nav a.active, .sidebar-nav button.nav-item.open{
+    background:#eaeaea; color:var(--primary-color); font-weight:600;
+}
+.sidebar-nav a svg, .sidebar-nav button.nav-item svg{width:18px;height:18px;margin-right:10px;}
+.divider{width:100%;height:1px;background:var(--border);margin:12px 0;}
+
+/* sub-menu */
+.nav-item.has-children{justify-content:space-between;}
+.nav-item.has-children .chevron{margin-left:auto;width:16px;height:16px;transition:transform .2s;}
+.sub-menu{list-style:none;margin-top:6px;margin-left:14px;display:none;flex-direction:column;gap:6px;padding-left:0;}
+.sub-menu a{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;color:var(--text-muted);padding-left:16px;}
+.nav-item.open + .sub-menu{display:flex;}
+.nav-item.open .chevron{transform:rotate(90deg);}
+
+/* MAIN CONTENT */
+.main-container{flex:1;display:flex;flex-direction:column;overflow:auto;}
+header.top-header{background:var(--card-bg);padding:14px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5;}
+.header-title{font-size:1.2rem;font-weight:600;}
+.user-profile{display:flex;align-items:center;gap:10px;}
+.user-profile img{border-radius:50%;width:36px;height:36px;object-fit:cover;}
+
+.content-area{padding:20px;}
+
+/* dashboard cards (from product page style) */
+.stats-container{display:flex;gap:12px;background:var(--card-bg);padding:14px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:16px;align-items:center;}
+.stat-card{flex:1;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;}
+.stat-content{display:flex;flex-direction:column;}
+.stat-value{font-size:1.4rem;font-weight:700;}
+.stat-label{font-size:0.86rem;color:var(--text-muted);}
+
+/* card wrapper for table */
+.card { background: var(--card-bg); border-radius: var(--radius); padding: 18px; border:1px solid var(--border); box-shadow:var(--shadow); }
+
+/* controls */
+.controls {display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px;flex-wrap:wrap;}
+.controls-left{display:flex;gap:12px;align-items:center;}
+.search-input, .filter-select { padding:10px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.95rem; }
+.search-input{width:320px;}
+
+/* table (adapted to product style) */
+.table-scroll{overflow:auto;}
+.order-table{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:0.95rem;text-align:left;}
+.order-table thead th{padding:10px 12px;color:var(--text-muted);text-transform:uppercase;font-size:0.75rem;letter-spacing:0.04em;}
+.order-table td{background:var(--card-bg);padding:12px;border-bottom:1px solid transparent;vertical-align:middle;box-shadow:0 1px 3px rgba(0,0,0,0.03);}
+.order-table tbody tr:nth-child(odd){background:#fbfbfb;}
+.order-table tbody tr:hover td{background:#f0f0f0;}
+.order-table td:first-child{width:90px;text-align:center;}
+.order-table td:nth-child(2){min-width:180px;}
+.order-table td:nth-child(3){min-width:120px;}
+.order-table td:nth-child(4){width:110px;}
+.order-table td:nth-child(5){width:120px;text-align:center;}
+.order-table td:nth-child(6){width:180px;text-align:right;}
+
+/* badges */
+.badge{padding:6px 10px;border-radius:9999px;font-weight:600;font-size:0.82rem;display:inline-block;}
+.badge-pending{background:#fffbeb;color:#a16207;}
+.badge-processing{background:#eff6ff;color:#1d4ed8;}
+.badge-shipped{background:#ecfdf5;color:#047857;}
+.badge-delivered{background:#f0fdf4;color:#16a34a;}
+.badge-cancelled{background:#fef2f2;color:#b91c1c;}
+
+/* dropdown / action button look like product design */
+.update-dropdown{padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600;margin-left:8px;}
+.actions-container{display:flex;gap:8px;align-items:center;justify-content:flex-end;}
+
+/* pagination */
+.pagination-container{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:12px;}
+.pagination-container button{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-weight:600;}
+.pagination-container button:disabled{opacity:.5;cursor:not-allowed;}
+
+/* modal */
+.modal{display:none;position:fixed;inset:0;background:var(--modal-backdrop);justify-content:center;align-items:center;z-index:999;}
+.modal.show{display:flex;}
+.modal-content{background:var(--modal-background);padding:20px;border-radius:12px;width:95%;max-width:900px;max-height:90vh;overflow:auto;border:1px solid var(--modal-border);box-shadow:var(--shadow-hover);}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.modal-section{background:#fff;border:1px solid var(--modal-border);padding:12px;border-radius:10px;margin-bottom:12px;}
+.muted{color:var(--text-muted);}
+
+/* responsiveness */
+@media (max-width:1000px){
+    .sidebar{width:72px;padding:12px;}
+    .sidebar-logo{font-size:1rem;}
+    .main-container{margin-left:72px;}
+    .search-input{width:100%;}
+}
+@media (max-width:650px){
+    body{flex-direction:column;}
+    aside.sidebar{width:100%;height:auto;box-shadow:none;display:flex;}
+    .main-container{padding:12px;}
+    .stats-container{flex-direction:column;gap:8px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar (styled like admin_addproduct) -->
+<aside class="sidebar">
+    <div class="sidebar-logo">Tropicart</div>
+    <nav class="sidebar-nav">
+        <ul class="nav-section">
+            <li><a class="nav-item" href="#"><i data-feather="bar-chart-2"></i> Dashboard</a></li>
+        </ul>
+
+        <ul class="nav-section">
+            <li>
+                <button class="nav-item has-children" id="managementDropdown">
+                    <i data-feather="grid"></i>
+                    <span>Management</span>
+                    <i class="chevron" data-feather="chevron-right"></i>
+                </button>
+
+                <ul class="sub-menu" id="managementSubMenu">
+                    <li><a href="admin_addproduct.html" class="muted-list-item"><i data-feather="box"></i> Product List</a></li>
+                    <li><a href="#" class="muted-list-item active"><i data-feather="file-text"></i> Order List</a></li>
+                    <li><a href="admin_shipment.html" class="muted-list-item"><i data-feather="users"></i>Shipment</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul class="nav-section">
+            <li><a class="nav-item" href="admin_reports.html"><i data-feather="file-text"></i> Reports</a></li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul class="nav-section">
+            <li><a class="nav-item" href="#"><i data-feather="settings"></i> Settings</a></li>
+            <li><a class="nav-item" href="#"><i data-feather="bell"></i> Notifications</a></li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <ul class="nav-section">
+            <li><a class="nav-item logout" href="#"><i data-feather="log-out"></i> Log Out</a></li>
+        </ul>
+    </nav>
+</aside>
+
+<!-- Main content -->
+<div class="main-container">
+    <header class="top-header">
+        <div class="header-title">Order Management</div>
+        <div class="user-profile">
+            <span id="orderCountDisplay" class="muted">0 Total Orders</span>
+            <img src="https://via.placeholder.com/40x40/00796b/ffffff?text=AU" alt="Admin">
+        </div>
+    </header>
+
+    <div class="content-area">
+        <!-- Dashboard cards -->
+        <div class="stats-container" id="dashboardCardsContainer">
+            <!-- Cards injected by JS -->
+        </div>
+
+        <!-- Table card -->
+        <div class="card">
+            <div class="controls">
+                <div class="controls-left">
+                    <input type="text" id="searchBox" class="search-input" placeholder="Search by name or Order ID...">
+                    <select id="filterStatus" class="filter-select">
+                        <option value="all">Filter by Status (All)</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="controls-right">
+                    <!-- reserved for future controls -->
+                </div>
+            </div>
+
+            <div class="table-scroll">
+                <table class="order-table" id="orderTableBody">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer Name</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th style="text-align:right;padding-right:16px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- rows populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container">
+                <span id="paginationInfo" class="pagination-info"></span>
+                <button id="prevPageBtn" disabled>Previous</button>
+                <button id="nextPageBtn" disabled>Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order detail modal -->
+<div id="orderDetailModal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalOrderTitle">
+        <div class="modal-header">
+            <h2 id="modalOrderTitle">Order #0000 Details</h2>
+            <button id="closeModalBtn" aria-label="Close" style="background:none;border:none;font-size:26px;cursor:pointer;color:var(--text-muted);">&times;</button>
+        </div>
+        <div id="modalOrderDetails"></div>
+    </div>
+</div>
+
+<script>
+feather.replace();
+
+/* -------- keep backend logic unchanged, only adapt presentation & small behavior change -------- */
+
+let currentPage = 1;
+const rowsPerPage = 10;
+window.allOrders = [];
+window.filteredOrders = [];
+
+// helper to safely get order id (supports different property names)
+function getOrderId(order) {
+    return order.orders_id ?? order.order_id ?? order.id ?? null;
+}
+function formatOrderId(order) {
+    const id = getOrderId(order);
+    return id !== null ? `#${String(id).padStart(4,'0')}` : '#0000';
+}
+
+// Dashboard card logic (same as before, but card markup aligns with product style)
+function calculateStats(orders) {
+    const totalOrders = orders.length;
+    let totalRevenue = 0;
+    let pendingOrders = 0;
+    let deliveredOrders = 0;
+
+    orders.forEach(order => {
+        totalRevenue += Number(order.total ?? order.total_amount ?? 0);
+        const status = (order.status ?? 'pending').toString().toLowerCase();
+        if (status === 'pending') pendingOrders++;
+        if (status === 'delivered') deliveredOrders++;
+    });
+
+    return { totalOrders, totalRevenue, pendingOrders, deliveredOrders };
+}
+
+function renderDashboardCards(orders) {
+    const stats = calculateStats(orders);
+    const container = document.getElementById('dashboardCardsContainer');
+
+    const cardData = [
+        { title: "Total Orders", value: stats.totalOrders.toLocaleString(), icon: "layers" },
+        { title: "Total Revenue", value: `₱${stats.totalRevenue.toFixed(2).toLocaleString('en-US')}`, icon: "trending-up" },
+        { title: "Pending Orders", value: stats.pendingOrders.toLocaleString(), icon: "clock" },
+        { title: "Delivered Orders", value: stats.deliveredOrders.toLocaleString(), icon: "check-circle" }
+    ];
+
+    container.innerHTML = cardData.map(cd => `
+        <div class="stat-card">
+            <i data-feather="${cd.icon}"></i>
+            <div class="stat-content">
+                <div class="stat-value">${cd.value}</div>
+                <div class="stat-label">${cd.title}</div>
+            </div>
+        </div>
+    `).join('');
+
+    feather.replace();
+}
+
+// Fetch orders and initialize (KEEP backend path unchanged)
+async function initializeApp() {
+    try {
+        const response = await fetch('admin_fetch_orders.php');
+        const orders = await response.json();
+
+    window.allOrders = Array.isArray(orders) ? orders.map(o => ({
+    ...o,
+    total: Number(o.total ?? o.total_amount ?? 0),
+    subtotal: Number(o.subtotal ?? 0),
+    shipping_fee: Number(o.shipping_fee ?? 0),
+    items: Array.isArray(o.items) ? o.items : (o.order_items ?? o.items_ordered ?? [])
+})) : [];
+
+
+        window.filteredOrders = [...window.allOrders];
+
+        renderDashboardCards(window.allOrders);
+        document.getElementById('orderCountDisplay').textContent = `${window.allOrders.length} Total Orders`;
+        renderOrdersTable(window.filteredOrders);
+    } catch (error) {
+        console.error("Failed to fetch orders:", error);
+        const tbody = document.querySelector('#orderTableBody tbody');
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">Failed to load orders.</td></tr>`;
+    }
+}
+
+function renderOrdersTable(orders) {
+    const tableBody = document.querySelector('#orderTableBody tbody');
+    tableBody.innerHTML = '';
+
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedOrders = orders.slice(startIndex, endIndex);
+
+    if (!paginatedOrders.length) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">No orders found matching criteria.</td></tr>`;
+        updatePaginationControls(orders.length);
+        return;
+    }
+
+    paginatedOrders.forEach(order => {
+        const tr = document.createElement('tr');
+
+        // columns
+        const tdId = document.createElement('td'); tdId.textContent = formatOrderId(order);
+        const tdName = document.createElement('td'); tdName.textContent = order.customer_name ?? order.customer ?? '—';
+        const tdDate = document.createElement('td'); tdDate.textContent = order.order_date ?? order.created_at ?? '—';
+        const tdTotal = document.createElement('td'); tdTotal.textContent = `₱${Number(order.total ?? 0).toFixed(2).toLocaleString('en-US')}`;
+
+        const tdStatus = document.createElement('td');
+        const status = (order.status ?? 'pending').toString().toLowerCase();
+        let badgeClass = 'badge-pending';
+        if(status === 'processing') badgeClass = 'badge-processing';
+        if(status === 'shipped') badgeClass = 'badge-shipped';
+        if(status === 'delivered') badgeClass = 'badge-delivered';
+        if(status === 'cancelled') badgeClass = 'badge-cancelled';
+        tdStatus.innerHTML = `<span class="badge ${badgeClass}">${status}</span>`;
+
+        const tdAction = document.createElement('td'); tdAction.style.textAlign='right';
+        const actionDiv = document.createElement('div'); actionDiv.className = 'actions-container';
+
+        // Details button
+        const detailsBtn = document.createElement('button');
+        detailsBtn.className = 'update-dropdown';
+        detailsBtn.innerHTML = `<i data-feather="eye" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i> Details`;
+        detailsBtn.onclick = () => showOrderDetail(order);
+        actionDiv.appendChild(detailsBtn);
+
+        // Status dropdown (only allow change when not final states)
+        if (!['processing','shipped','delivered','cancelled'].includes(status)) {
+            const dropdown = document.createElement('select');
+            dropdown.className = 'update-dropdown';
+            dropdown.innerHTML = `<option value="">Update Status</option>
+                                  <option value="processing">Processing</option>
+                                  <option value="cancelled">Cancelled</option>`;
+            dropdown.onchange = () => {
+                if (dropdown.value) updateOrderStatus(order, dropdown.value, tdStatus, dropdown);
+            };
+            actionDiv.appendChild(dropdown);
+        }
+
+        tdAction.appendChild(actionDiv);
+
+        tr.appendChild(tdId);
+        tr.appendChild(tdName);
+        tr.appendChild(tdDate);
+        tr.appendChild(tdTotal);
+        tr.appendChild(tdStatus);
+        tr.appendChild(tdAction);
+
+        tableBody.appendChild(tr);
+    });
+
+    feather.replace();
+    updatePaginationControls(orders.length);
+}
+
+// Update order status via backend (KEEP endpoints unchanged)
+// IMPORTANT change: DO NOT remove dropdown after update — clear selection instead so user can update again.
+function updateOrderStatus(order, newStatus, statusCell, dropdown) {
+    const orderId = getOrderId(order);
+    if (orderId === null) return;
+
+    console.log(`Setting Order #${String(orderId).padStart(4,'0')} to "${newStatus}".`);
+
+    fetch('admin_update_order_status.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, action: newStatus })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data?.success) {
+            let badgeClass = 'badge-pending';
+            if (newStatus === 'processing') badgeClass = 'badge-processing';
+            if (newStatus === 'shipped') badgeClass = 'badge-shipped';
+            if (newStatus === 'delivered') badgeClass = 'badge-delivered';
+            if (newStatus === 'cancelled') badgeClass = 'badge-cancelled';
+
+            statusCell.innerHTML = `<span class="badge ${badgeClass}">${newStatus}</span>`;
+
+            // Instead of removing dropdown, just reset the value so it remains usable
+            if (dropdown) dropdown.value = '';
+
+            // Update global in-memory order status if present
+            const globalOrder = window.allOrders.find(o => getOrderId(o) == orderId);
+            if (globalOrder) globalOrder.status = newStatus;
+
+            // Re-render dashboard and table to reflect the change globally
+            applySearchFilter();
+        } else {
+            console.error(data?.message ?? 'Failed to update status.');
+            if (dropdown) dropdown.value = '';
+        }
+    })
+    .catch(err => { console.error(err); if (dropdown) dropdown.value = ''; });
+}
+
+function updatePaginationControls(totalOrders) {
+    const totalPages = Math.max(1, Math.ceil(totalOrders / rowsPerPage));
+    document.getElementById('prevPageBtn').disabled = currentPage === 1;
+    document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+
+    const start = totalOrders === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+    const end = Math.min(currentPage * rowsPerPage, totalOrders);
+    document.getElementById('paginationInfo').textContent = totalOrders ? `Showing ${start}-${end} of ${totalOrders} orders` : 'No orders found.';
+}
+
+// modal show/hide (unchanged)
+function showOrderDetail(order) {
+    const modal = document.getElementById('orderDetailModal');
+    const title = document.getElementById('modalOrderTitle');
+    const detailsContainer = document.getElementById('modalOrderDetails');
+
+    const orderId = getOrderId(order);
+    title.textContent = `Order ${orderId !== null ? '#' + String(orderId).padStart(4,'0') : ''} Details`;
+
+    const name = order.customer_name ?? order.customer ?? 'N/A';
+    const email = order.customer_email ?? order.email ?? 'N/A';
+    const phone = order.customer_phone ?? order.phone ?? 'N/A';
+    const delivery_type = order.delivery_type ?? order.delivery ?? 'N/A';
+    const shipping_address = order.shipping_address ?? order.address ?? 'N/A';
+    const payment_method = order.payment_method ?? order.payment ?? 'N/A';
+    const items = Array.isArray(order.items) ? order.items : [];
+
+    const itemsHtml = items.length ? items.map(it => {
+        const qty = it.quantity ?? it.qty ?? 1;
+        const pname = it.product_name ?? it.name ?? 'Product';
+        const price = Number(it.price_at_time ?? it.price ?? 0);
+        const subtotal = (qty * price).toFixed(2);
+        return `<li><strong>${qty} x</strong> ${pname} — ₱${price.toFixed(2).toLocaleString('en-US')} <span class="muted"> (Subtotal: ₱${subtotal.toLocaleString('en-US')})</span></li>`;
+    }).join('') : '<li>No items found.</li>';
+
+    const subtotal = Number(order.subtotal ?? order.sub_total ?? 0).toFixed(2);
+    const shipping_fee = Number(order.shipping_fee ?? 0).toFixed(2);
+    const total = Number(order.total ?? order.total_amount ?? 0).toFixed(2);
+    const status = (order.status ?? 'pending').toLowerCase();
+
+    detailsContainer.innerHTML = `
+        <div class="modal-section">
+            <h3><i data-feather="user" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i> Customer Info</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+        </div>
+        <div class="modal-section">
+            <h3><i data-feather="truck" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i> Delivery / Payment</h3>
+            <p><strong>Type:</strong> ${delivery_type}</p>
+            <p><strong>Address:</strong> ${shipping_address}</p>
+            <p><strong>Method:</strong> ${payment_method}</p>
+        </div>
+        <div class="modal-section">
+            <h3><i data-feather="shopping-bag" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i> Items Ordered</h3>
+            <ul class="items-list">${itemsHtml}</ul>
+        </div>
+        <div class="modal-section">
+            <h3><i data-feather="dollar-sign" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"></i> Summary</h3>
+            <p><strong>Subtotal:</strong> ₱${Number(subtotal).toLocaleString('en-US')}</p>
+            <p><strong>Shipping:</strong> ₱${Number(shipping_fee).toLocaleString('en-US')}</p>
+            <p style="font-size:1.05rem;font-weight:700;"><strong>Grand Total:</strong> ₱${Number(total).toLocaleString('en-US')}</p>
+            <p><strong>Status:</strong> <span class="badge ${'badge-'+status}">${status}</span></p>
+        </div>
+    `;
+    feather.replace();
+    modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
+}
+
+function hideOrderDetail() {
+    const modal = document.getElementById('orderDetailModal');
+    modal.classList.remove('show'); modal.setAttribute('aria-hidden','true');
+}
+
+/* event listeners */
+document.getElementById('closeModalBtn').addEventListener('click', hideOrderDetail);
+window.addEventListener('click', e => { if (e.target === document.getElementById('orderDetailModal')) hideOrderDetail(); });
+document.getElementById('searchBox').addEventListener('input', () => { currentPage = 1; applySearchFilter(); });
+document.getElementById('filterStatus').addEventListener('change', () => { currentPage = 1; applySearchFilter(); });
+
+document.getElementById('prevPageBtn').addEventListener('click', () => {
+    if (currentPage > 1) { currentPage--; renderOrdersTable(window.filteredOrders); }
+});
+document.getElementById('nextPageBtn').addEventListener('click', () => {
+    const totalPages = Math.ceil(window.filteredOrders.length / rowsPerPage);
+    if (currentPage < totalPages) { currentPage++; renderOrdersTable(window.filteredOrders); }
+});
+
+// search/filter
+function applySearchFilter() {
+    const searchVal = document.getElementById('searchBox').value.toLowerCase().trim();
+    const filterVal = document.getElementById('filterStatus').value;
+    window.filteredOrders = window.allOrders.filter(order => {
+        const idStr = String(getOrderId(order) ?? '');
+        const name = (order.customer_name ?? order.customer ?? '').toLowerCase();
+        const matchesSearch = name.includes(searchVal) || idStr.includes(searchVal);
+        const matchesFilter = filterVal === 'all' || ((order.status ?? '').toLowerCase() === filterVal);
+        return matchesSearch && matchesFilter;
+    });
+
+    // re-render cards & table
+    renderDashboardCards(window.filteredOrders);
+    renderOrdersTable(window.filteredOrders);
+}
+
+/* Initialize app */
+initializeApp();
+
+/* Sidebar dropdown behavior to match product page pattern */
+const managementDropdown = document.getElementById('managementDropdown');
+managementDropdown?.addEventListener('click', () => {
+    managementDropdown.classList.toggle('open');
+});
+</script>
+
+</body>
+</html>

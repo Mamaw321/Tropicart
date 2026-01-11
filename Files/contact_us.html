@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Tropicart</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script> 
+    <script src="https://unpkg.com/feather-icons"></script> 
+
+    <style>
+        /* =========================================
+           1. COLORS & BASE (Refined UI)
+        ========================================= */
+        :root {
+            --primary-color: #febaba; 
+            --primary-dark: #e59a9a; /* Pink/Red for accents */
+            --primary-light: #fff0f0;
+            --text-dark: #2a3342;
+            --text-muted: #8898aa;
+            --background-light: #f4f7f6;
+            --white: #ffffff;
+            --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+        }
+
+        /* NEW PINK/ROSE COLOR FOR HIGHLIGHTS */
+        .highlight-rose { color: #f43f5e; } /* rose-500 */
+        .bg-highlight-rose { background-color: #f43f5e; } /* rose-500 */
+
+        body {
+            font-family: 'Poppins', sans-serif; 
+            background: var(--background-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; color: inherit; transition: all 0.2s; }
+
+        /* =========================================
+           2. HEADER / NAVBAR
+        ========================================= */
+        header {
+            width: 100%;
+            padding: 15px 0;
+            background: var(--white);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo { 
+            font-size: 24px; 
+            font-weight: 800; 
+            color: var(--primary-dark); 
+            letter-spacing: -0.5px;
+            flex: 1;
+        }
+
+        nav-menu {
+            flex: 2;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav-menu ul { 
+            display: flex; 
+            list-style: none; 
+            gap: 40px; 
+            padding: 0; 
+            margin: 0; 
+        }
+
+        nav-menu ul li a { 
+            font-weight: 500; 
+            color: var(--text-dark); 
+            font-size: 15px;
+            position: relative;
+        }
+
+        nav-menu ul li a:hover { color: var(--primary-dark); }
+
+        nav-menu ul li a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: var(--primary-dark);
+            transition: width 0.3s;
+        }
+        nav-menu ul li a:hover::after,
+        nav-menu ul li a.active::after { width: 100%; }
+        nav-menu ul li a.active { color: var(--primary-dark); }
+
+
+        .nav-icons { 
+            flex: 1;
+            display: flex; 
+            gap: 20px; 
+            justify-content: flex-end;
+            align-items: center; 
+            color: var(--text-dark); 
+        }
+
+        .nav-icons i { 
+            width: 22px; 
+            height: 22px; 
+            cursor: pointer; 
+            transition: transform 0.2s;
+        }
+        .nav-icons i:hover { transform: scale(1.1); color: var(--primary-dark); }
+
+        .cart-icon-wrapper { position: relative; cursor: pointer; display: flex; align-items: center; }
+        #cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--primary-dark);
+            color: #fff;
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        #logoutBtn {
+            padding: 8px 16px;
+            border: 1px solid var(--primary-dark);
+            color: var(--primary-dark);
+            border-radius: 8px;
+            background: transparent;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        #logoutBtn:hover {
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            nav-menu { display: none; }
+        }
+
+        /* =========================================
+           3. MAP STYLES
+        ========================================= */
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+        @media (min-width: 768px) {
+            #map {
+                height: 500px;
+            }
+        }
+        
+        /* Contact Form Styles (Simple styling for now) */
+        .contact-form input[type="text"], .contact-form input[type="email"], .contact-form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #fafafa;
+            transition: border-color 0.2s;
+        }
+        .contact-form input:focus, .contact-form textarea:focus {
+            border-color: #f43f5e; /* Highlight rose-500 on focus */
+            outline: none;
+            box-shadow: 0 0 0 1px #f43f5e;
+        }
+
+        /* =========================================
+           4. CART MODAL
+        ========================================= */
+        .cart-modal {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 400px;
+            height: 100vh;
+            background: var(--white);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            transition: right .4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-modal.open { right: 0; }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .cart-header h3 { margin: 0; font-size: 20px; font-weight: 700; }
+
+        .close-cart {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #fdfdfd;
+        }
+
+        /* STYLES ADDED/ADJUSTED FOR CART IMAGE */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item img {
+            width: 60px; 
+            height: 60px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-right: 15px;
+            background: #fff;
+            padding: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .cart-item-details {
+            flex-grow: 1;
+        }
+
+        .cart-item-price {
+            font-weight: 600;
+        }
+        /* END STYLES FOR CART IMAGE */
+
+        .cart-total {
+            font-size: 20px; font-weight: 700; padding: 20px 25px;
+            background: var(--white); border-top: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between;
+        }
+
+        .cart-footer { padding: 0 25px 25px 25px; background: var(--white); }
+
+        .checkout-btn {
+            width: 100%;
+            background: var(--text-dark);
+            color: var(--white);
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .checkout-btn:hover { background: var(--primary-dark); }
+        
+        @media (max-width: 768px) {
+            .cart-modal { width: 100%; }
+        }
+    </style>
+</head>
+
+<body class="bg-amber-50 text-slate-800">
+
+<header>
+    <div class="navbar-container">
+        <div class="logo">Tropicart</div>
+        <nav-menu>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="user_product_page.html">Products</a></li>
+                <li><a href="aboutus.html">About Us</a></li>
+                <li><a href="contact_us.html" class="active">Contact</a></li>
+            </ul>
+        </nav-menu>
+        <div class="nav-icons">
+            <i data-feather="bell"></i>
+            <div class="cart-icon-wrapper" onclick="openCart()">
+                <i data-feather="shopping-cart"></i>
+                <span id="cart-count">1</span> 
+            </div>
+            <div id="welcomeUser" style="font-weight:600; font-size:14px;">Hi, User</div> 
+            <button id="logoutBtn">Logout</button>
+        </div>
+    </div>
+</header>
+<div class="relative bg-rose-500 py-24 sm:py-32">
+    <div class="absolute inset-0 overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1542848906-c67299a9ecf3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2000&q=80&blend=ec4899&sat=-80&blend-mode=multiply" alt="Tropical fruit and foliage" class="h-full w-full object-cover object-center">
+    </div>
+    <div class="relative max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl">Get in Touch with Tropicart</h1>
+        <p class="mt-6 text-lg leading-8 text-rose-100 max-w-2xl mx-auto">
+            Have a question about an order, a flavor, or want to partner with us? We'd love to hear from you!
+        </p>
+    </div>
+</div>
+<div class="py-16 sm:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            
+            <div class="p-8 bg-rose-50 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-6 highlight-rose">Contact Information</h2>
+                <p class="text-lg text-slate-600 mb-8">
+                    Need immediate assistance? Reach out to our customer care team using the information below.
+                </p>
+
+                <div class="space-y-6">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-10 w-10 rounded-md bg-rose-100 highlight-rose">
+                                <i data-feather="phone" class="h-6 w-6"></i> 
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-slate-900">Customer Support</h3>
+                            <p class="mt-1 text-slate-500">Call us: **(123) 456-7890**</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-10 w-10 rounded-md bg-rose-100 highlight-rose">
+                                <i data-feather="mail" class="h-6 w-6"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-slate-900">General Inquiries</h3>
+                            <p class="mt-1 text-slate-500">Email us: **hello@tropicart.com**</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-10 w-10 rounded-md bg-rose-100 highlight-rose">
+                                <i data-feather="map-pin" class="h-6 w-6"></i> 
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-slate-900">Mailing Address</h3>
+                            <p class="mt-1 text-slate-500">456 Pineapple Way, Juice District,<br>Miami, FL 33101, USA</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 bg-gray-50 rounded-xl shadow-lg contact-form">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-6">Send Us a Message</h2>
+                <form action="#" method="POST" class="mt-8">
+                    <div>
+                        <label for="full-name" class="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                        <input type="text" name="full-name" id="full-name" placeholder="John Doe" required>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
+                        <input type="email" name="email" id="email" placeholder="you@example.com" required>
+                    </div>
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-slate-700 mb-2">Subject</label>
+                        <input type="text" name="subject" id="subject" placeholder="Order Inquiry #12345" required>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-slate-700 mb-2">Your Message</label>
+                        <textarea id="message" name="message" rows="4" placeholder="How can we help you?" required></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-rose-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-rose-600 transition duration-150">
+                        Submit Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="bg-amber-50 py-16 sm:py-24">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <h2 class="text-3xl font-bold tracking-tight text-slate-900 mb-8 text-center">Find Our Headquarters</h2>
+        <div id="map" class="shadow-xl">
+            </div>
+    </div>
+</div>
+<div id="cartModal" class="cart-modal">
+    <div class="cart-header">
+        <h3>Your Cart</h3>
+        <button class="close-cart" onclick="closeCart()">✕</button>
+    </div>
+    <div id="cartItems" class="cart-items">
+        <div class="cart-item">
+            <img src="https://i.ibb.co/v6sMq1Nb/ee-5.png" alt="Pineapple Juice">
+            <div class="cart-item-details">
+                <div class="cart-item-name">Pineapple Paradise</div>
+                <div class="cart-item-price">₱150.00</div>
+                <div class="qty-controls">
+                    <button>-</button>
+                    <span>1</span> 
+                    <button>+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="cart-total">
+        <span>Total:</span>
+        <span id="cartTotal">₱150.00</span>
+    </div>
+    <div class="cart-footer">
+        <button id="checkoutButton" class="checkout-btn">Proceed To Checkout</button>
+    </div>
+</div>
+<script>
+    // --- Map Initialization ---
+    const HQ_LOCATION = { lat: 25.77427, lng: -80.19366 }; 
+
+    /**
+     * The callback function that initializes and displays the map.
+     */
+    function initMap() {
+        google.maps.importLibrary("maps").then(({ Map }) => {
+            const map = new Map(document.getElementById("map"), {
+                center: HQ_LOCATION,
+                zoom: 14,
+                mapId: "DEMO_MAP_ID",
+            });
+
+            google.maps.importLibrary("marker").then(({ Marker }) => {
+                new Marker({
+                    position: HQ_LOCATION,
+                    map: map,
+                    title: "TropicArt HQ",
+                });
+            });
+        });
+    }
+
+    // --- General JS & Stubs ---
+    document.addEventListener('DOMContentLoaded', () => {
+        feather.replace();
+        
+        window.openCart = function(){ 
+            const cartModal = document.getElementById('cartModal');
+            if (cartModal) { cartModal.classList.add('open'); }
+        }
+        window.closeCart = function(){ 
+            const cartModal = document.getElementById('cartModal');
+            if (cartModal) { cartModal.classList.remove('open'); }
+        }
+        
+        // Sample values and functionality
+        document.getElementById('welcomeUser').textContent = "Hi, User";
+        document.getElementById('cart-count').textContent = "1";
+        document.getElementById('cartTotal').textContent = "₱150.00";
+        
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            alert('Logged out (Stub)');
+        });
+
+        const checkoutBtn = document.getElementById("checkoutButton");
+        if(checkoutBtn) {
+            checkoutBtn.addEventListener("click", () => {
+                alert('Proceeding to Checkout (Stub)');
+            });
+        }
+
+        // Form Submission Stub
+        const contactForm = document.querySelector('.contact-form form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Message Submitted! We will get back to you shortly.');
+                contactForm.reset();
+            });
+        }
+    });
+</script>
+
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9cVfRFmZblhWBRMSAK-xJqV4r4lrDA4Q&callback=initMap&v=weekly">
+</script>
+
+</body>
+</html>

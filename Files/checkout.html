@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tropicart - Checkout</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Poppins', sans-serif; background: #f4f7f6; color: #2a3342; margin:0; padding:0;}
+.container { max-width: 800px; margin: 50px auto; padding: 20px; background: #fff; border-radius: 16px; box-shadow: 0 10px 15px rgba(0,0,0,0.05);}
+h1 { text-align: center; margin-bottom: 20px; color:#febaba;}
+form { display: flex; flex-direction: column; gap:15px;}
+label { font-weight: 600; }
+input, select { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px;}
+.cart-summary { margin-top: 30px; border-top: 1px dashed #ccc; padding-top: 20px;}
+.cart-row { display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 8px;}
+.cart-total { font-weight: 700; font-size: 18px; margin-top: 12px;}
+button { background:#febaba; border:none; padding:15px; border-radius:12px; font-weight:700; font-size:16px; cursor:pointer; transition:0.3s;}
+button:hover { background:#e59a9a;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Checkout</h1>
+  
+  <form id="checkoutForm">
+    <label>Full Name</label>
+    <input type="text" name="full_name" required>
+
+    <label>Email</label>
+    <input type="email" name="email" required>
+
+    <label>Phone</label>
+    <input type="text" name="phone" required>
+
+    <label>City</label>
+    <input type="text" name="city" required>
+
+    <label>Address</label>
+    <input type="text" name="address" required>
+
+    <label>ZIP Code</label>
+    <input type="text" name="zip" required>
+
+    <label>Delivery Type</label>
+    <select name="delivery_type" required>
+      <option value="standard">Standard</option>
+      <option value="express">Express</option>
+    </select>
+
+    <label>Payment Method</label>
+    <select name="payment_method" required>
+      <option value="cod">Cash on Delivery</option>
+      <option value="gcash">Gcash</option>
+    </select>
+
+    <div class="cart-summary">
+      <div class="cart-row"><span>Subtotal:</span> <span id="subtotalDisplay">₱0.00</span></div>
+      <div class="cart-row"><span>Shipping:</span> <span id="shippingDisplay">₱0.00</span></div>
+      <div class="cart-row"><span>Discount:</span> <span id="discountDisplay">₱0.00</span></div>
+      <div class="cart-total"><span>Total:</span> <span id="totalDisplay">₱0.00</span></div>
+    </div>
+
+    <button type="submit">Place Order</button>
+  </form>
+
+</div>
+
+<script>
+(() => {
+  const FREE_SHIPPING_THRESHOLD = 6;
+  const SHIPPING_COST = 50.00;
+
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let subtotal = 0, shipping = 0, discount = 0, total = 0;
+
+  function calculateTotals() {
+    subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+    shipping = totalQty >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+    total = subtotal + shipping - discount;
+
+    document.getElementById('subtotalDisplay').innerText = `₱${subtotal.toFixed(2)}`;
+    document.getElementById('shippingDisplay').innerText = shipping === 0 ? 'FREE' : `₱${shipping.toFixed(2)}`;
+    document.getElementById('discountDisplay').innerText = `₱${discount.toFixed(2)}`;
+    document.getElementById('totalDisplay').innerText = `₱${total.toFixed(2)}`;
+  }
+
+  calculateTotals();
+
+  document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if(cart.length === 0) { alert("Your cart is empty!"); return; }
+
+    const formData = new FormData(this);
+    const payload = {
+      full_name: formData.get('full_name'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      city: formData.get('city'),
+      address: formData.get('address'),
+      zip: formData.get('zip'),
+      delivery_type: formData.get('delivery_type'),
+      payment_method: formData.get('payment_method'),
+      subtotal: subtotal,
+      shipping: shipping,
+      discount: discount,
+      total: total,
+      cartItems: cart
+    };
+
+    try {
+      const res = await fetch('checkout.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if(data.success){
+        alert(`Order placed successfully! Order ID: ${data.orders_id}`);
+        localStorage.removeItem('cart'); // Clear cart
+        window.location.href = 'order_success.html?order_id=' + data.orders_id;
+      } else {
+        alert('Failed to place order: ' + data.message);
+      }
+    } catch(err) {
+      console.error(err);
+      alert('Error placing order.');
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

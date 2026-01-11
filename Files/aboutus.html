@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tropicart - About Us</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* =========================================
+            1. VARIABLES (Merged from Contact Page)
+        ========================================= */
+        :root {
+            --primary-color: #febaba; 
+            --primary-dark: #e59a9a; /* Pink/Red for accents */
+            --primary-light: #fff0f0;
+            --text-dark: #2a3342;
+            --text-muted: #8898aa;
+            --background-light: #f4f7f6;
+            --white: #ffffff;
+            --shadow: 0 15px 40px rgba(254, 186, 186, 0.4); 
+            --radius: 24px;
+
+            /* Retained for About Us content styles */
+            --tropic-pink: #febaba;
+            --tropic-green: #2a3342; 
+            --footer-bg-color: #F8D6D6; 
+            --footer-text-color: #555555; 
+            --footer-heading-color: #333333; 
+            --newsletter-bg: #444444; 
+            --text-grey: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--white); /* Keeping original white background for content */
+            color: var(--text-dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        a { text-decoration: none; color: inherit; transition: all 0.2s; }
+        ul { list-style: none; }
+        img { max-width: 100%; display: block; }
+        button { cursor: pointer; font-family: 'Poppins', sans-serif; }
+
+        /* =========================================
+            2. HEADER / NAVBAR (Copied from Contact Page)
+        ========================================= */
+        header {
+            width: 100%;
+            padding: 15px 0; /* Adjusted padding from Contact page */
+            background: var(--white);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.03); /* Adjusted shadow from Contact page */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1200px; /* Adjusted max-width from Contact page */
+            margin: 0 auto;
+            padding: 0 20px; /* Adjusted padding from Contact page */
+            display: flex;
+            align-items: center;
+        }
+
+        .logo { 
+            font-size: 24px; /* Adjusted font-size from Contact page */
+            font-weight: 800; /* Adjusted font-weight from Contact page */
+            color: var(--primary-dark); /* Adjusted color from Contact page */
+            letter-spacing: -0.5px;
+            flex: 1; /* Allows it to take up space on the left */
+        } 
+
+        /* Custom tag for the nav container to match Contact page */
+        nav-menu {
+            flex: 2; /* Allows it to be centered */
+            display: flex;
+            justify-content: center;
+        }
+
+        nav-menu ul { 
+            display: flex; 
+            list-style: none; 
+            gap: 40px; 
+            padding: 0; 
+            margin: 0; 
+        }
+
+        nav-menu ul li a { 
+            font-weight: 500; /* Adjusted font-weight from Contact page */
+            color: var(--text-dark); 
+            font-size: 15px; /* Adjusted font-size from Contact page */
+            position: relative;
+        }
+
+        nav-menu ul li a:hover { color: var(--primary-dark); }
+
+        /* Active/Hover Underline Effect */
+        nav-menu ul li a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: var(--primary-dark);
+            transition: width 0.3s;
+        }
+        nav-menu ul li a:hover::after,
+        nav-menu ul li a.active::after { width: 100%; }
+        nav-menu ul li a.active { color: var(--primary-dark); }
+        /* End Active/Hover Underline Effect */
+
+
+        .nav-icons { 
+            flex: 1;
+            display: flex; 
+            gap: 20px; 
+            justify-content: flex-end; /* Pushes content to the right */
+            align-items: center; 
+            color: var(--text-dark); 
+        }
+
+        .nav-icons i { 
+            width: 22px; 
+            height: 22px; 
+            cursor: pointer; 
+            transition: transform 0.2s;
+        }
+        .nav-icons i:hover { transform: scale(1.1); color: var(--primary-dark); }
+
+        .cart-icon-wrapper { position: relative; cursor: pointer; display: flex; align-items: center; }
+        #cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--primary-dark);
+            color: #fff;
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        #logoutBtn {
+            padding: 8px 16px;
+            border: 1px solid var(--primary-dark);
+            color: var(--primary-dark);
+            border-radius: 8px;
+            background: transparent;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        #logoutBtn:hover {
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            nav-menu { display: none; }
+            .navbar-container { justify-content: space-between; } /* Revert to space-between on small screens */
+            .nav-icons { gap: 15px; } /* Tighter spacing for mobile */
+        }
+        /* End Navbar Styles */
+
+
+        /* =========================================
+            3. LAYOUT CONTAINER & CONTENT STYLES (Retained from original About Us)
+        ========================================= */
+        .container {
+            max-width: 1400px; 
+            margin: 0 auto;
+            padding: 0 45px; 
+            width: 100%;
+        }
+
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-header h2 { font-size: 2.5rem; margin-bottom: 10px; }
+        .section-header p { color: var(--text-grey); }
+
+        .about-us-section { padding: 80px 0 100px; }
+
+        .content-block { display: flex; align-items: center; gap: 60px; margin-bottom: 80px; }
+        .content-block:nth-child(even) { flex-direction: row-reverse; }
+        .content-block.community { flex-direction: row; }
+
+        .content-image { flex: 1; min-width: 45%; }
+        .content-image img { border-radius: var(--radius); box-shadow: var(--shadow); width: 100%; height: auto; max-height: 400px; object-fit: cover; }
+
+        .content-text { flex: 1; min-width: 45%; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .content-text h2 { font-size: 2.5rem; margin-bottom: 20px; line-height: 1.2; color: var(--text-dark); }
+        .content-text p { color: var(--text-grey); margin-bottom: 30px; }
+        
+        .tag { background: rgba(254, 186, 186, 0.2); color: var(--primary-color); padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; margin-bottom: 15px; }
+        .btn { display: inline-block; padding: 14px 32px; background-color: var(--primary-color); color: var(--text-dark); border-radius: 50px; font-weight: 600; font-size: 1rem; border: none; box-shadow: 0 10px 20px rgba(254, 186, 186, 0.3); transition: transform 0.2s, box-shadow 0.2s; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(254, 186, 186, 0.45); }
+        .btn-outline { background-color: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); box-shadow: none; }
+
+        .stats-row { display: flex; gap: 40px; border-top: 1px solid #eee; padding-top: 30px; justify-content: center; }
+        .stat-item h3 { font-size: 2rem; color: var(--primary-color); }
+        .stat-item span { font-size: 0.9rem; color: #888; }
+        
+        .vision-list { display: inline-block; text-align: left; }
+        .vision-list li { position: relative; padding-left: 25px; margin-bottom: 10px; color: var(--text-dark); font-weight: 500; }
+        .vision-list li::before { content: '✓'; color: var(--primary-color); font-size: 1.2rem; position: absolute; left: 0; top: -2px; }
+
+        .freshness-grid, .team-section { padding: 50px 0 100px; }
+        
+        .team-grid {
+            display: flex;
+            gap: 80px;
+            justify-content: center; 
+            flex-wrap: wrap;
+            margin-top: 50px;
+            align-items: flex-start; 
+        }
+
+        .team-member {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center; 
+            max-width: 260px;
+        }
+
+        .team-member img {
+            width: 150px; 
+            height: 150px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            margin-bottom: 20px; 
+            border: 4px solid var(--primary-color);
+            transition: transform 0.3s;
+            background-color: #f0f0f0; 
+        }
+
+        .team-member img:hover {
+            transform: scale(1.05);
+        }
+
+        .team-member h4 { 
+            font-size: 1.2rem; 
+            margin-bottom: 5px; 
+            margin-top: 0; 
+        }
+        
+        .team-member p { 
+            color: var(--primary-color); 
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+
+        .grid-layout { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 150px); gap: 20px; }
+        .grid-item { border-radius: 20px; overflow: hidden; position: relative; }
+        .grid-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .grid-item:hover img { transform: scale(1.1); }
+        .span-2 { grid-column: span 2; }
+
+        footer { background: var(--footer-bg-color); padding: 0; margin-top: 80px; }
+        .footer-cols { display: grid; grid-template-columns: repeat(5, 1fr); gap: 30px; padding: 80px 20px 40px; text-align: center; }
+        .footer-col h4 { font-size: 1rem; font-weight: 600; color: var(--footer-heading-color); margin-bottom: 25px; }
+        .footer-col ul li { margin-bottom: 12px; }
+        .footer-col ul li a, .footer-col p { font-size: 0.9rem; color: var(--footer-text-color); }
+        .footer-col ul li a:hover { color: var(--footer-heading-color); }
+        .footer-col .contact-info { display: flex; align-items: flex-start; justify-content: center; margin-bottom: 10px; gap: 10px; }
+        .footer-col .contact-info i { font-size: 1.1rem; color: var(--footer-text-color); }
+
+        .newsletter-input-group { display: flex; margin-top: 15px; justify-content: center; }
+        .newsletter-input-group input { border: none; padding: 12px 15px; border-radius: 4px 0 0 4px; font-size: 0.9rem; background: rgba(255,255,255,0.7); color: var(--text-dark); width: 100%; }
+        .newsletter-input-group button { background: var(--newsletter-bg); color: var(--white); border: none; padding: 12px 15px; border-radius: 0 4px 4px 0; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
+
+        .footer-bottom-container { max-width: 1100px; margin: 0 auto; padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.4); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--footer-text-color); }
+        .social-icons a { font-size: 1.2rem; margin-left: 15px; color: var(--footer-heading-color); transition: color 0.3s; }
+        .social-icons a:hover { color: var(--primary-color); }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 968px) {
+            .content-block, .content-block:nth-child(even), .content-block.community { flex-direction: column; }
+            .content-text, .content-image { min-width: 100%; }
+            .grid-layout { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(2, 100px); }
+            .footer-cols { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); text-align: center; }
+            .footer-bottom-container { flex-direction: column; gap: 15px; }
+        }
+
+        /* Styles for Cart Modal (Needed for the shopping-cart functionality) */
+        .cart-modal {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 400px;
+            height: 100vh;
+            background: var(--white);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            transition: right .4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-modal.open { right: 0; }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .cart-header h3 { margin: 0; font-size: 20px; font-weight: 700; }
+
+        .close-cart {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #fdfdfd;
+        }
+        
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item img {
+            width: 60px; 
+            height: 60px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-right: 15px;
+            background: #fff;
+            padding: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .cart-item-details {
+            flex-grow: 1;
+        }
+
+        .cart-item-price {
+            font-weight: 600;
+        }
+
+        .cart-total {
+            font-size: 20px; font-weight: 700; padding: 20px 25px;
+            background: var(--white); border-top: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between;
+        }
+
+        .cart-footer { padding: 0 25px 25px 25px; background: var(--white); }
+
+        .checkout-btn {
+            width: 100%;
+            background: var(--text-dark);
+            color: var(--white);
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .checkout-btn:hover { background: var(--primary-dark); }
+        
+        @media (max-width: 768px) {
+            .cart-modal { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="navbar-container">
+            <div class="logo">Tropicart</div>
+            <nav-menu>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="user_product_page.html">Products</a></li>
+                    <li><a href="#" class="active">About Us</a></li>
+                    <li><a href="contact_us.html">Contact</a></li>
+                </ul>
+            </nav-menu>
+            <div class="nav-icons">
+                <i data-feather="bell"></i>
+                <div class="cart-icon-wrapper" onclick="openCart()">
+                    <i data-feather="shopping-cart"></i>
+                    <span id="cart-count">1</span> 
+                </div>
+                <div id="welcomeUser" style="font-weight:600; font-size:14px;">Hi, User</div> 
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div id="cartModal" class="cart-modal">
+        <div class="cart-header">
+            <h3>Your Cart</h3>
+            <button class="close-cart" onclick="closeCart()">✕</button>
+        </div>
+        <div id="cartItems" class="cart-items">
+            <div class="cart-item">
+                <img src="https://images.unsplash.com/photo-1579621970588-a35d0e7ab93b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&q=80&w=300" alt="Pineapple Juice Placeholder">
+                <div class="cart-item-details">
+                    <div class="cart-item-name">Pineapple Paradise</div>
+                    <div class="cart-item-price">₱150.00</div>
+                    <div class="qty-controls">
+                        <button>-</button>
+                        <span>1</span> 
+                        <button>+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="cart-total">
+            <span>Total:</span>
+            <span id="cartTotal">₱150.00</span>
+        </div>
+        <div class="cart-footer">
+            <button id="checkoutButton" class="checkout-btn">Proceed To Checkout</button>
+        </div>
+    </div>
+    <section class="about-us-section">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2>About Tropicart: Our Core Mission</h2>
+                <p>We are dedicated to bringing you the freshest, most vibrant flavors with an unwavering commitment to health and the planet.</p>
+            </div>
+
+            <div class="content-block reveal">
+                <div class="content-image">
+                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=800" alt="Farmers Market Produce">
+                </div>
+                <div class="content-text">
+                    <span class="tag">Our Journey</span>
+                    <h2>The Idea That Started <br>With a Simple Goal</h2>
+                    <p>Elaine and Miky have always shared a simple belief: the best flavors come from nature itself. What started as a small curiosity—mixing fruits, herbs, and locally found ingredients in their own kitchen—slowly grew into a passion they couldn’t ignore. They noticed how refreshing it felt to enjoy drinks made without artificial colors, heavy sugars, or preservatives. Just real ingredients with real flavor..</p>
+                    <button class="btn">Read The Full Story</button>
+                </div>
+            </div>
+
+            <div class="content-block reveal">
+                <div class="content-image">
+                    <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&q=80&w=800" alt="Juice Bottles Lined Up">
+                </div>
+                <div class="content-text">
+                    <span class="tag">Our Promise</span>
+                    <h2>Bottled with Love, <br>Served with Freshness</h2>
+                    <p>We believe that what you put into your body matters. That's why we source our ingredients from local, organic farms that prioritize sustainable practices. No preservatives, no concentrates—just pure, liquid nature.</p>
+                    
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <h3>98%</h3>
+                            <span>Fruit Content</span>
+                        </div>
+                        <div class="stat-item">
+                            <h3>590K+</h3>
+                            <span>Happy Sippers</span>
+                        </div>
+                        <div class="stat-item">
+                            <h3>24h</h3>
+                            <span>Farm to Bottle</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-block reveal">
+                <div class="content-image">
+                    <img src="Pictures/3rd.jpg" alt="Farmer holding fresh produce">
+                </div>
+                <div class="content-text">
+                    <span class="tag">Our Vision</span>
+                    <h2>Sustainable Choices for a <br>Healthier Future</h2>
+                    <p>Tropicart is committed to minimizing our environmental impact. From compostable packaging to zero-waste production methods, every choice we make supports a cleaner planet.</p>
+                    
+                    <ul class="vision-list">
+                        <li>Eco-friendly and recyclable packaging</li>
+                        <li>Direct sourcing from ethical, local farms</li>
+                        <li>100% plant-based and cruelty-free</li>
+                        <li>Supporting community health initiatives</li>
+                    </ul>
+                    <button class="btn-outline">Learn About Our Sourcing</button>
+                </div>
+            </div>
+
+            <div class="content-block community reveal" style="margin-top: 100px;">
+                <div class="content-text">
+                    <span class="tag">Impact & Community</span>
+                    <h2>More Than Just Juice: <br>Giving Back to the Planet</h2>
+                    <p>For every bottle of Tropicart sold, we plant one tree through our partnership with 'Green Earth Now.' We also donate 1% of our profits monthly to local food security programs, ensuring our freshest ingredients reach those who need them most.</p>
+                    <button class="btn-outline">See Our Annual Report</button>
+                </div>
+                <div class="content-image">
+                    <img src="Pictures/collecting.jpg" alt="Volunteers collecting waste">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="freshness-grid">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2>Sun-Kissed Ingredients</h2>
+                <p>See what goes inside your bottle.</p>
+            </div>
+            
+            <div class="grid-layout">
+                <div class="grid-item span-2 reveal">
+                    <img src="Pictures/watermelon.jpeg" alt="Fresh Strawberries">
+                </div>
+                <div class="grid-item reveal">
+                    <img src="Pictures/kiwi.jpg" alt="Holding Bottle">
+                </div>
+                <div class="grid-item reveal">
+                    <img src="Pictures/orange.jpg" alt="Pomegranate">
+                </div>
+                <div class="grid-item reveal">
+                    <img src="Pictures/banana.jpg" alt="Sliced Orange">
+                </div>
+                <div class="grid-item span-2 reveal">
+                    <img src="Pictures/grape.jpg" alt="Fruit Assortment">
+                </div>
+                <div class="grid-item reveal">
+                    <img src="Pictures/mango.jpg" alt="Lemon">
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="team-section">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2>Meet Our Tropicart Family</h2>
+                <p>The dedicated individuals who bring the freshest flavors from farm to bottle.</p>
+            </div>
+            
+            <div class="team-grid">
+                <div class="team-member reveal">
+                    <img src="Pictures/Elaine.jpg" alt="Elaine Sandigan">
+                    <h4>Elaine Mae L. Sandigan</h4>
+                    <p>Senior Front End & Back-End Developer</p>
+                </div>
+                
+                <div class="team-member reveal" style="transition-delay: 0.1s;">
+                    <img src="Pictures/Miky.jpg" alt="Mikylla Jereza">
+                    <h4>Mikylla Nicole S. Jereza</h4>
+                    <p>Head Designer</p>
+                </div>
+                
+                <div class="team-member reveal" style="transition-delay: 0.2s;">
+                    <img src="Pictures/Jeremiah.jpg" alt="Jeremiah Roilo">
+                    <h4>Jeremiah T Roilo</h4>
+                    <p>Junior Designer</p>
+                </div>
+                
+                <div class="team-member reveal" style="transition-delay: 0.3s;">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300&h=300" alt="Christine Juban">
+                    <h4>Christine Juban</h4>
+                    <p>Marketing Expert</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 50px;" class="reveal">
+                <p style="color: var(--text-dark); margin-bottom: 15px;">Passionate about health and sustainability? Join our mission!</p>
+                <a href="#" class="btn-outline">View Career Opportunities</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container footer-cols">
+            <div class="footer-col">
+                <h4>Menu</h4>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Search</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">About Us</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Products</h4>
+                <ul>
+                    <li><a href="#">Juice</a></li>
+                    <li><a href="#">Smoothies</a></li>
+                    <li><a href="#">Cleanses</a></li>
+                    <li><a href="#">Boosters</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Follow us</h4>
+                <ul>
+                    <li><a href="#">Facebook</a></li>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">TikTok</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contacts</h4>
+                <div class="contact-info">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <p>4578 Marmora Road, Glasgow</p>
+                </div>
+                <div class="contact-info">
+                    <i class="fas fa-phone"></i>
+                    <p>123-456-7890</p>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Newsletter</h4>
+                <p>Subscribe to our newsletter for fresh updates!</p>
+                <div class="newsletter-input-group">
+                    <input type="email" placeholder="your-email@text.com">
+                    <button><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom-container">
+            <p>&copy; 2025 Tropicart. All Rights Reserved.</p>
+            <div class="social-icons">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- Navbar and Cart Logic (Copied from Contact Page) ---
+        window.openCart = function(){ 
+            const cartModal = document.getElementById('cartModal');
+            if (cartModal) { cartModal.classList.add('open'); }
+        }
+        window.closeCart = function(){ 
+            const cartModal = document.getElementById('cartModal');
+            if (cartModal) { cartModal.classList.remove('open'); }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            
+            // Set Stub values
+            const welcomeUser = document.getElementById('welcomeUser');
+            if (welcomeUser) welcomeUser.textContent = "Hi, User";
+
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) cartCount.textContent = "1";
+
+            const cartTotal = document.getElementById('cartTotal');
+            if (cartTotal) cartTotal.textContent = "₱150.00";
+            
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    alert('Logged out (Stub)');
+                });
+            }
+
+            const checkoutBtn = document.getElementById("checkoutButton");
+            if(checkoutBtn) {
+                checkoutBtn.addEventListener("click", () => {
+                    alert('Proceeding to Checkout (Stub)');
+                });
+            }
+
+            // --- Content Reveal Logic (from original About Us) ---
+            window.addEventListener('scroll', reveal);
+            function reveal() {
+                var reveals = document.querySelectorAll('.reveal');
+                for(var i = 0; i < reveals.length; i++) {
+                    var windowHeight = window.innerHeight;
+                    var revealTop = reveals[i].getBoundingClientRect().top;
+                    var revealPoint = 100; 
+                    if(revealTop < windowHeight - revealPoint) {
+                        reveals[i].classList.add('active');
+                    }
+                }
+            }
+            reveal();
+        });
+    </script>
+</body>
+</html>

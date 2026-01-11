@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tropicart Admin - Sales Reports</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+    <style>
+        /* --- NEW CSS VARIABLES --- */
+        :root{
+            --sidebar-bg:#ffffff;
+            --page-bg:#eeeeee;
+            --card-bg:#ffffff;
+            --text-dark:#222;
+            --text-muted:#6c6c6c;
+            --border:#e5e5e5;
+            --radius:12px;
+            --primary-color:#333; /* Dark gray primary color */
+            --hover:#f4f4f4;
+            --modal-backdrop: rgba(0,0,0,0.4);
+            --modal-background:#F8F9FA;
+            --modal-border:#E0E0E0;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-hover: 0 6px 15px rgba(0,0,0,0.06);
+
+            /* Chart Colors (Distinct for data visualization) */
+            --chart-red: #ef4444;
+            --chart-yellow: #facc15;
+            --chart-green: #22c55e;
+            --chart-blue: #3b82f6; 
+        }
+
+        /* --- NEW BASE STYLES --- */
+        *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+        body{display:flex;height:100vh;background:var(--page-bg);color:var(--text-dark);overflow:hidden;}
+        a{color:inherit;text-decoration:none;}
+
+        /* --- NEW SIDEBAR STYLES --- */
+        aside.sidebar{
+            width:220px; /* Updated width */
+            background:var(--sidebar-bg);
+            padding:20px;
+            box-shadow:2px 0 10px rgba(0,0,0,0.05);
+            overflow-y:auto; /* Use overflow-y for scrolling */
+            flex-shrink: 0;
+        }
+        .sidebar-logo{font-size:1.3rem;font-weight:700;color:var(--primary-color);margin-bottom:18px;}
+        .sidebar-nav ul{list-style:none;display:flex;flex-direction:column;gap:8px;padding-left:0;}
+        .sidebar-nav a, .sidebar-nav button.nav-item {
+            display:flex; align-items:center; padding:10px; border-radius:10px; color:var(--text-muted);
+            background:none;border:none; width:100%; text-align:left; cursor:pointer;
+        }
+        .sidebar-nav a:hover:not(.active), .sidebar-nav button.nav-item:hover:not(.open){
+            background:var(--hover); color:var(--text-dark);
+        }
+        /* NEW ACTIVE/OPEN STYLES */
+        .sidebar-nav a.active, .sidebar-nav button.nav-item.open{
+            background:#eaeaea; color:var(--primary-color); font-weight:600;
+        }
+        .sidebar-nav a svg, .sidebar-nav button.nav-item svg{width:18px;height:18px;margin-right:10px;}
+        .divider{width:100%;height:1px;background:var(--border);margin:12px 0;}
+        
+        /* Sub-menu and Chevron logic */
+        .sub-menu {
+            list-style: none;
+            padding-left: 28px !important; 
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .nav-item.open + .sub-menu {
+            max-height: 500px; /* Sufficient height for smooth transition */
+        }
+        .sub-menu a {
+            padding: 8px 10px; 
+            font-size: 0.95rem; /* Slightly smaller font for sub-items */
+        }
+        .chevron {
+            margin-left: auto;
+            transition: transform 0.3s;
+        }
+        .nav-item.open .chevron {
+            transform: rotate(90deg);
+        }
+
+        /* Main Content - FIXED MARGIN ISSUE */
+        .main-content {
+            flex-grow: 1;
+            padding: 24px;
+            /* Removed margin-left: 220px; as it caused double spacing with flexbox */
+            overflow-y: auto;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            padding: 24px;
+        }
+
+        /* Report Specific Styles (Kept) */
+        .kpi-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .kpi-icon-wrapper {
+            padding: 10px;
+            border-radius: 50%;
+            background-color: var(--hover); 
+            color: var(--primary-color);
+        }
+        .kpi-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .kpi-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        
+        /* Table Styles */
+        .report-table th, .report-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .report-table th {
+            background-color: var(--hover);
+            font-weight: 600;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        .report-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        /* Sales Trend Button Active State */
+        .sales-period-btn.active-chart-btn {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        .peso-icon {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">Tropicart</div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="admin_dashboard.html"><i data-feather="bar-chart-2"></i> Dashboard</a></li>
+            </ul>
+
+            <ul>
+                <li>
+                    <button class="nav-item has-children" id="managementDropdown">
+                        <i data-feather="grid"></i>
+                        <span>Management</span>
+                        <i class="chevron" data-feather="chevron-right"></i>
+                    </button>
+
+                    <ul class="sub-menu">
+                        <li><a href="admin_addproduct.html"><i data-feather="box"></i> Product List</a></li>
+                        <li><a href="admin_orderlist.html"><i data-feather="file-text"></i> Order List</a></li>
+                        <li><a href="admin_shipment.html"><i data-feather="truck"></i> Shipment</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="divider"></div>
+
+            <ul>
+                <li><a class="active" href="admin_reports.html"><i data-feather="file-text"></i> Reports</a></li>
+            </ul>
+
+            <div class="divider"></div>
+
+            <ul>
+                <li><a href="admin_settings.html"><i data-feather="settings"></i> Settings</a></li>
+                <li><a href="admin_notifications.html"><i data-feather="bell"></i> Notifications</a></li>
+            </ul>
+
+            <div class="divider"></div>
+
+            <ul>
+                <li><a href="admin_logout.html"><i data-feather="log-out"></i> Log Out</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <div class="main-content">
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Sales Reports & Analytics</h1>
+            <p class="text-gray-500">In-depth analysis of product performance and revenue trends.</p>
+        </header>
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="kpi-card">
+                <div>
+                    <p class="kpi-label">Total Revenue (All Time)</p>
+                    <p class="kpi-value" id="kpi-revenue">₱--,--</p>
+                </div>
+              <div class="kpi-icon-wrapper">
+    <span class="peso-icon">₱</span>
+</div>
+
+            </div>
+            <div class="kpi-card">
+                <div>
+                    <p class="kpi-label">Total Number of Orders</p>
+                    <p class="kpi-value" id="kpi-orders">---</p>
+                </div>
+                <div class="kpi-icon-wrapper">
+                    <i data-feather="package" class="w-6 h-6"></i>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div>
+                    <p class="kpi-label">Average Order Value</p>
+                    <p class="kpi-value" id="kpi-aov">₱--,--</p>
+                </div>
+                <div class="kpi-icon-wrapper">
+                    <i data-feather="trending-up" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </section>
+
+     <section class="card mb-8">
+    <h2 class="text-xl font-semibold mb-6">Sales Dashboard Overview</h2>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- SALES TREND -->
+        <div>
+            <h3 class="font-semibold mb-2">Sales Trend (Revenue)</h3>
+            <p class="text-sm text-gray-500 mb-2">Daily / Weekly / Monthly Sales</p>
+
+            <div class="flex space-x-2 mb-3">
+                <button class="sales-period-btn active-chart-btn px-3 py-1 rounded bg-gray-800 text-white text-sm"
+                        onclick="showSalesChart('daily')">Daily</button>
+                <button class="sales-period-btn px-3 py-1 rounded bg-gray-200 text-sm"
+                        onclick="showSalesChart('weekly')">Weekly</button>
+                <button class="sales-period-btn px-3 py-1 rounded bg-gray-200 text-sm"
+                        onclick="showSalesChart('monthly')">Monthly</button>
+            </div>
+
+            <div class="h-80">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- BEST SALES PIE -->
+        <div>
+            <h3 class="font-semibold mb-2">Best-Selling Products</h3>
+            <p class="text-sm text-gray-500 mb-2">Based on units sold</p>
+
+            <div class="h-80">
+                <canvas id="bestSellersChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+    <!-- ADDITIONAL REPORTS -->
+<section class="card mt-8">
+    <h2 class="text-xl font-semibold mb-6">Additional Sales Reports</h2>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- TOP PRODUCTS BY REVENUE -->
+        <div>
+            <h3 class="font-semibold mb-2">Top Products by Revenue</h3>
+            <p class="text-sm text-gray-500 mb-2">Highest earning products</p>
+            <div class="h-80">
+                <canvas id="revenueByProductChart"></canvas>
+            </div>
+        </div>
+
+        <!-- REVENUE CONTRIBUTION -->
+        <div>
+            <h3 class="font-semibold mb-2">Revenue Contribution (%)</h3>
+            <p class="text-sm text-gray-500 mb-2">Share of total revenue</p>
+            <div class="h-80">
+                <canvas id="revenueContributionChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+</section>
+
+
+        <section class="card">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Detailed Product Sales Report</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full report-table">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Quantity Sold</th>
+                            <th>Total Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-sales-table-body">
+                        </tbody>
+                </table>
+            </div>
+            <div id="product-sales-loading" class="text-center py-6 text-gray-500">Loading detailed sales data...</div>
+        </section>
+
+    </div>
+
+<script>
+    // --- Utility Functions ---
+    const formatCurrency = (amount) => {
+        // Formats currency to Philippine Peso (PHP)
+        return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(amount);
+    };
+const formatCompactNumber = (value) => {
+    if (value >= 1_000_000) {
+        return (value / 1_000_000).toFixed(1).replace('.0', '') + 'M';
+    }
+    if (value >= 1_000) {
+        return (value / 1_000).toFixed(1).replace('.0', '') + 'k';
+    }
+    return value.toString();
+};
+
+    // --- Data Storage (Will hold the data fetched from the server) ---
+    let reportData = null;
+let revenueByProductChart = null;
+let revenueContributionChart = null;
+
+    // --- Chart Instances (Retained) ---
+    let salesChartInstance = null;
+    let bestSellersChartInstance = null;
+
+    // Line Chart for Sales Trends (Revenue)
+  const renderSalesChart = (data, period) => {
+    const ctx = document.getElementById('salesChart');
+    if (salesChartInstance) salesChartInstance.destroy();
+
+    salesChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels.map(l => `${l} Sales`),
+            datasets: [{
+                label: `${period} Revenue`,
+                data: data.data,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,0.15)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { display: true },
+                datalabels: {
+                    align: 'top',
+                   formatter: value => `₱${formatCompactNumber(value)}`,
+ font: { weight: 'bold', size: 10 }
+                }
+            },
+            scales: {
+                y: {
+                    title: { display: true, text: 'Revenue (PHP)' }
+                },
+                x: {
+                    title: { display: true, text: `${period} Sales Period` }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+};
+const renderRevenueByProductChart = (products) => {
+    const ctx = document.getElementById('revenueByProductChart');
+    if (revenueByProductChart) revenueByProductChart.destroy();
+
+    const topProducts = products
+        .slice(0, 20); // supports up to 20 products
+
+    revenueByProductChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: topProducts.map(p =>
+                p.name.length > 25 ? p.name.substring(0, 25) + '…' : p.name
+            ),
+            datasets: [{
+                label: 'Revenue (PHP)',
+                data: topProducts.map(p => p.revenue),
+                backgroundColor: '#22c55e'
+            }]
+        },
+        options: {
+            indexAxis: 'y', // 🔑 horizontal bars
+            plugins: {
+                legend: { display: false },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'right',
+                  formatter: v => `₱${formatCompactNumber(v)}`,
+  font: { weight: 'bold', size: 10 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => formatCurrency(ctx.raw)
+                    }
+                }
+            },
+            scales: {
+             x: {
+    title: { display: true, text: 'Revenue (PHP)' },
+    ticks: {
+        callback: value => `₱${formatCompactNumber(value)}`
+    }
+}
+,
+                y: {
+                    ticks: {
+                        font: { size: 11 }
+                    }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+};
+
+// PIE CHART: Revenue Contribution %
+const renderRevenueContributionChart = (products) => {
+    const ctx = document.getElementById('revenueContributionChart');
+    if (revenueContributionChart) revenueContributionChart.destroy();
+
+    const totalRevenue = products.reduce((sum, p) => sum + p.revenue, 0);
+    const topProducts = products.slice(0, 5);
+
+    revenueContributionChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: topProducts.map(p => p.name),
+            datasets: [{
+                data: topProducts.map(p => ((p.revenue / totalRevenue) * 100).toFixed(1)),
+                backgroundColor: [
+                    '#3b82f6', '#22c55e', '#facc15', '#ef4444', '#a855f7'
+                ]
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true
+                    }
+                },
+                datalabels: {
+                    formatter: value => `${value}%`,
+                    color: '#fff',
+                    font: { weight: 'bold' }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+};
+
+    // Horizontal Bar Chart for Best-Sellers (Quantity Sold)
+  const renderBestSellersChart = (products) => {
+    const ctx = document.getElementById('bestSellersChart');
+    if (bestSellersChartInstance) bestSellersChartInstance.destroy();
+
+    const top10 = products.slice(0, 5);
+
+    bestSellersChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: top10.map(p => p.name),
+            datasets: [{
+                data: top10.map(p => p.units),
+                backgroundColor: [
+                    '#ef4444', '#facc15', '#22c55e', '#3b82f6', '#a855f7'
+                ]
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                datalabels: {
+                    formatter: value => `${value} units`,
+                    color: '#fff',
+                    font: { weight: 'bold' }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+};
+
+    // UI/Action Functions
+    
+    const showSalesChart = (period) => {
+        // Use real data from reportData
+        const data = reportData ? reportData.salesTrends[period] : null; 
+        
+        if (data) {
+            renderSalesChart(data, period.charAt(0).toUpperCase() + period.slice(1));
+            
+            // Update button styles 
+            document.querySelectorAll('.sales-period-btn').forEach(btn => {
+                btn.classList.remove('active-chart-btn');
+                btn.classList.remove('bg-gray-800', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            
+            const selectedButton = document.querySelector(`.sales-period-btn[onclick="showSalesChart('${period}')"]`);
+            if(selectedButton) {
+                selectedButton.classList.add('active-chart-btn');
+                selectedButton.classList.add('bg-gray-800', 'text-white'); 
+            }
+        }
+    };
+    
+    const renderKpis = () => {
+        // Use real data from reportData
+        if (reportData && reportData.kpis) {
+            document.getElementById('kpi-revenue').textContent = formatCurrency(reportData.kpis.revenue);
+            document.getElementById('kpi-orders').textContent = reportData.kpis.orders.toLocaleString();
+            document.getElementById('kpi-aov').textContent = formatCurrency(reportData.kpis.aov);
+        } else {
+            // Placeholder text if data is not loaded
+            document.getElementById('kpi-revenue').textContent = '₱--,--';
+            document.getElementById('kpi-orders').textContent = '---';
+            document.getElementById('kpi-aov').textContent = '₱--,--';
+        }
+    };
+
+    const renderProductSalesTable = () => {
+        const tbody = document.getElementById('product-sales-table-body');
+        const products = reportData ? reportData.detailedProductSales : [];
+        
+        if (products.length > 0) {
+            tbody.innerHTML = products.map(p => `
+                <tr>
+                    <td class="font-medium">${p.name}</td>
+                    <td>${p.units.toLocaleString()}</td>
+                    <td class="font-bold">${formatCurrency(p.revenue)}</td>
+                </tr>
+            `).join('');
+            document.getElementById('product-sales-loading').classList.add('hidden');
+        } else {
+            tbody.innerHTML = '';
+            document.getElementById('product-sales-loading').textContent = 'No sales data found.';
+            document.getElementById('product-sales-loading').classList.remove('hidden');
+        }
+    };
+    
+    // --- Data Fetching Logic ---
+    const fetchReportData = async () => {
+        try {
+            // Show loading state for the table
+            document.getElementById('product-sales-loading').classList.remove('hidden');
+            document.getElementById('product-sales-loading').textContent = 'Loading sales data...';
+            
+            const response = await fetch('admin_report_data.php');
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            reportData = await response.json();
+            
+            // Initialize Reports with REAL Data
+            renderKpis();
+            showSalesChart('daily'); 
+            renderBestSellersChart(reportData.bestSellersByUnits);
+            renderProductSalesTable(); 
+            renderRevenueByProductChart(reportData.detailedProductSales);
+renderRevenueContributionChart(reportData.detailedProductSales);
+
+        } catch (error) {
+            console.error('Error fetching report data:', error);
+            document.getElementById('product-sales-loading').textContent = `Error loading data: ${error.message}. Check admin_report_data.php and database connection.`;
+        }
+    };
+
+
+    // --- Initial Load and Event Listeners ---
+    document.addEventListener('DOMContentLoaded', () => {
+        feather.replace();
+        
+        // --- Sidebar dropdown logic ---
+        const managementDropdown = document.getElementById('managementDropdown');
+        const subMenu = managementDropdown.nextElementSibling; 
+
+        managementDropdown.addEventListener('click', () => {
+            managementDropdown.classList.toggle('open');
+        });
+        
+        // Fetch and render REAL data on load
+        fetchReportData(); 
+    });
+</script>
+</body>
+</html>

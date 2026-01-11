@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tropicart Product Catalog</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand-primary': '#F97316', // Tropical Orange
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .font-inter { font-family: 'Inter', 'sans-serif'; }
+        body { background-color: #fcfcfd; }
+        #selection-modal { transition: opacity 0.3s ease-in-out; }
+        #cart-sidebar { transition: transform 0.4s ease-in-out; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .product-card-hover:hover {
+            transform: scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="font-inter min-h-screen flex flex-col">
+
+<header class="bg-white/95 backdrop-blur-sm shadow-lg sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <i data-lucide="shopping-bag" class="w-7 h-7 text-brand-primary drop-shadow-md"></i>
+            <span class="text-xl font-extrabold text-gray-900 md:text-2xl">Tropicart</span>
+        </div>
+        <nav class="flex space-x-6 items-center">
+            <a href="index.html" class="text-gray-600 hover:text-brand-primary font-medium transition duration-150">Home</a>
+            <span class="text-brand-primary font-semibold border-b-2 border-brand-primary pb-1">Products</span>
+            <a href="contact.html" class="text-gray-600 hover:text-brand-primary font-medium transition duration-150">Contact</a>
+            
+            <button id="cart-button" onclick="openCartSidebar()" class="relative p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition duration-150 ml-4">
+    <img src="images/grocery-store.png" alt="Cart" class="w-6 h-6">
+    <span id="cart-count" class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white leading-none shadow-md hidden">0</span>
+</button>
+
+        </nav>
+    </div>
+</header>
+
+<main class="flex-grow pt-10">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div class="text-center mb-12">
+            <i data-lucide="shopping-cart" class="w-12 h-12 mx-auto text-brand-primary mb-3 drop-shadow-lg"></i>
+            <h2 class="text-4xl font-extrabold text-gray-900 mb-2">Tropicart Fruit Catalog</h2>
+            <p class="text-lg text-gray-600 mx-auto max-w-3xl">
+                Browse our fresh tropical fruits and add your favorites to the cart!
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 p-4 bg-gray-50 rounded-xl shadow-inner border border-gray-200">
+            <div class="lg:col-span-2 relative">
+                <input type="text" id="search-input" placeholder="Search fruit name..." 
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-brand-primary focus:border-brand-primary transition"
+                        onkeyup="filterAndRenderProducts()">
+                <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+            </div>
+            <div class="relative">
+                <i data-lucide="chevrons-up-down" class="w-5 h-5 text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2 z-10"></i>
+                <select id="sort-select" onchange="filterAndRenderProducts()"
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm bg-white appearance-none focus:ring-brand-primary focus:border-brand-primary transition">
+                    <option value="default">Sort By Default</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="name-asc">Name: A to Z</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-16"></div>
+
+        <div id="no-results" class="hidden text-center py-20">
+            <i data-lucide="frown" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+            <h3 class="text-2xl font-semibold text-gray-700">No fruits match your search.</h3>
+        </div>
+    </div>
+</main>
+
+<!-- Selection Modal -->
+<div id="selection-modal" class="fixed inset-0 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm mx-4 transform transition-all duration-300 scale-95" role="dialog" aria-modal="true">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+            <h3 class="text-xl font-bold text-gray-800 flex items-center space-x-2">
+                <i data-lucide="shopping-cart" class="w-6 h-6 text-brand-primary"></i>
+                <span>Add to Cart</span>
+            </h3>
+            <button onclick="closeSelectionModal()" class="p-1 text-gray-400 hover:text-gray-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        
+        <p id="modal-product-name" class="text-lg font-semibold text-gray-900 mb-4"></p>
+
+        <div class="mb-6">
+            <label for="modal-quantity-input" class="block text-sm font-medium text-gray-700 mb-2">Quantity:</label>
+            <div class="flex items-center space-x-3">
+                <button onclick="adjustQuantity(-1)" class="p-3 w-12 h-12 rounded-full bg-brand-primary hover:bg-orange-700 text-white transition font-bold shadow-md flex items-center justify-center">
+                    <span class="text-3xl font-extrabold leading-none select-none">-</span>
+                </button>
+                <input type="number" id="modal-quantity-input" value="1" min="1" max="99" class="flex-grow text-center border-2 border-brand-primary rounded-xl p-3 text-2xl font-bold shadow-inner focus:ring-brand-primary focus:border-brand-primary transition text-gray-900">
+                <button onclick="adjustQuantity(1)" class="p-3 w-12 h-12 rounded-full bg-brand-primary hover:bg-orange-700 text-white transition font-bold shadow-md flex items-center justify-center">
+                    <span class="text-3xl font-extrabold leading-none select-none">+</span>
+                </button>
+            </div>
+        </div>
+        
+        <button onclick="addToCart()" id="add-to-cart-btn" class="w-full py-3 rounded-lg text-white bg-brand-primary hover:bg-orange-700 transition font-bold shadow-md flex items-center justify-center space-x-2">
+            <i data-lucide="shopping-cart" class="w-5 h-5 inline-block mr-1"></i> Add to Cart
+        </button>
+    </div>
+</div>
+
+<div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[55] hidden" onclick="closeSelectionModal()"></div>
+
+<!-- Cart Sidebar (same as original, just branding changed) -->
+<div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-[70] transform translate-x-full transition-transform duration-500 flex flex-col">
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+        <h3 class="text-2xl font-bold text-gray-900 flex items-center space-x-2">
+            <i data-lucide="shopping-bag" class="w-6 h-6 text-brand-primary"></i>
+            <span>Your Cart</span>
+        </h3>
+        <button onclick="closeCartSidebar()" class="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+    </div>
+
+    <div id="cart-items-container" class="flex-grow overflow-y-auto p-6 space-y-4">
+        <p class="text-gray-500 text-center mt-6">Your cart is empty.</p>
+    </div>
+
+    <div class="p-6 border-t border-gray-100 bg-gray-50">
+        <div id="cart-summary" class="space-y-2 mb-4">
+            <div class="flex justify-between font-medium text-gray-600">
+                <span>Subtotal (<span id="total-items">0</span> items)</span>
+                <span id="cart-subtotal">$0.00</span>
+            </div>
+            <div class="flex justify-between font-bold text-xl text-gray-900">
+                <span>Total (Incl. Mock Tax)</span>
+                <span id="cart-total">$0.00</span>
+            </div>
+        </div>
+        
+        <a href="checkout.html" 
+           id="checkout-button"
+           class="w-full py-4 rounded-xl text-white bg-brand-primary hover:bg-orange-700 transition font-bold shadow-lg flex items-center justify-center space-x-2 disabled:opacity-50">
+            <i data-lucide="lock" class="w-5 h-5"></i>
+            <span>Proceed to Checkout</span>
+        </a>
+    </div>
+</div>
+
+<div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[65] hidden" onclick="closeCartSidebar()"></div>
+
+<footer class="bg-gray-800 text-gray-400 py-6 mt-auto">
+    <div class="container mx-auto px-4 text-center">
+        <p class="text-sm">&copy; 2025 Tropicart. All rights reserved. Cart uses local browser storage.</p>
+    </div>
+</footer>
+
+<div id="toast-notification" class="fixed bottom-6 right-6 z-[80] p-4 rounded-xl bg-green-600 text-white shadow-2xl transform translate-x-[150%] transition-transform duration-500 ease-in-out hidden flex items-center space-x-3" role="alert">
+    <i id="toast-icon" data-lucide="check-circle" class="w-6 h-6 flex-shrink-0"></i>
+    <span id="toast-message" class="font-medium"></span>
+</div>
+
+<script src="https://unpkg.com/lucide-icons@0.363.0/dist/umd/lucide.js"></script>
+<script>
+    const CART_STORAGE_KEY = 'tropicart_user_cart';
+    window.cartItems = [];
+    window.currentProductIdForModal = null;
+
+    // --- Sample Fruit Products ---
+    const MOCK_PRODUCTS = [
+        { id: 1, name: "Mango", description: "Juicy tropical mango, perfect for smoothies.", price: 3.50, image: "https://placehold.co/300x200/FBBF24/ffffff?text=Mango" },
+        { id: 2, name: "Pineapple", description: "Sweet and tangy pineapple, rich in vitamins.", price: 4.25, image: "https://placehold.co/300x200/FBBF24/ffffff?text=Pineapple" },
+        { id: 3, name: "Papaya", description: "Fresh papaya, ideal for fruit salads.", price: 2.99, image: "https://placehold.co/300x200/FBBF24/ffffff?text=Papaya" },
+        { id: 4, name: "Banana", description: "Ripe bananas full of energy and potassium.", price: 1.50, image: "https://placehold.co/300x200/FBBF24/ffffff?text=Banana" },
+        { id: 5, name: "Dragon Fruit", description: "Exotic dragon fruit with vibrant pink skin.", price: 5.00, image: "https://placehold.co/300x200/FBBF24/ffffff?text=Dragon+Fruit" },
+        { id: 6, name: "Passion Fruit", description: "Tangy passion fruit, perfect for juices.", price: 3.75, image: "https://placehold.co/300x200/FBBF24/ffffff?text=Passion+Fruit" }
+    ];
+    window.allProducts = MOCK_PRODUCTS;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        loadCart();
+        filterAndRenderProducts();
+    });
+
+    function filterAndRenderProducts() {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+        const sortValue = document.getElementById('sort-select').value;
+
+        let filtered = window.allProducts.filter(p => p.name.toLowerCase().includes(searchTerm) || p.description.toLowerCase().includes(searchTerm));
+
+        if (sortValue === 'price-asc') filtered.sort((a,b) => a.price - b.price);
+        else if (sortValue === 'price-desc') filtered.sort((a,b) => b.price - a.price);
+        else if (sortValue === 'name-asc') filtered.sort((a,b) => a.name.localeCompare(b.name));
+
+        renderProducts(filtered);
+    }
+
+    function renderProducts(products) {
+        const grid = document.getElementById('product-grid');
+        grid.innerHTML = '';
+        
+        if(products.length === 0){
+            document.getElementById('no-results').classList.remove('hidden');
+            return;
+        } else {
+            document.getElementById('no-results').classList.add('hidden');
+        }
+
+        products.forEach(product => {
+            const card = document.createElement('div');
+            card.className = "bg-white rounded-xl shadow-md p-4 flex flex-col product-card-hover transition transform";
+            card.innerHTML = `
+                <img src="${product.image}" alt="${product.name}" class="rounded-xl mb-3 object-cover w-full h-48">
+                <h3 class="text-lg font-bold text-gray-900 mb-1">${product.name}</h3>
+                <p class="text-gray-500 text-sm mb-3 flex-grow">${product.description}</p>
+                <div class="mt-auto pt-3 border-t border-gray-100">
+                    <div class="text-lg font-bold text-gray-900 mb-3">$${product.price.toFixed(2)}</div>
+                    <button onclick="openSelectionModal(${product.id})" class="w-full py-2 rounded-lg bg-brand-primary text-white font-bold hover:bg-orange-700 transition">Add to Cart</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function openSelectionModal(productId) {
+        window.currentProductIdForModal = productId;
+        const product = window.allProducts.find(p => p.id === productId);
+        document.getElementById('modal-product-name').textContent = product.name;
+        document.getElementById('modal-quantity-input').value = 1;
+        document.getElementById('selection-modal').classList.remove('hidden');
+        setTimeout(()=>document.getElementById('selection-modal').classList.remove('opacity-0'),10);
+        document.getElementById('modal-overlay').classList.remove('hidden');
+    }
+
+    function closeSelectionModal() {
+        document.getElementById('selection-modal').classList.add('opacity-0');
+        document.getElementById('modal-overlay').classList.add('hidden');
+        setTimeout(()=>document.getElementById('selection-modal').classList.add('hidden'),300);
+    }
+
+    function adjustQuantity(amount){
+        const input = document.getElementById('modal-quantity-input');
+        let val = parseInt(input.value)||1;
+        val = Math.max(1, Math.min(99, val+amount));
+        input.value = val;
+    }
+
+    function addToCart() {
+        const quantity = parseInt(document.getElementById('modal-quantity-input').value)||1;
+        const product = window.allProducts.find(p=>p.id===window.currentProductIdForModal);
+        if(!product) return;
+
+        const existingItem = window.cartItems.find(i=>i.productId===product.id);
+        if(existingItem){
+            existingItem.quantity += quantity;
+        } else {
+            window.cartItems.push({
+                docId: 'id-' + Date.now(),
+                productId: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                quantity: quantity
+            });
+        }
+        saveCart();
+        renderCartItems();
+        closeSelectionModal();
+        showToast(`${quantity} x ${product.name} added to cart!`);
+    }
+
+    function loadCart(){
+        const storedCart = localStorage.getItem(CART_STORAGE_KEY);
+        window.cartItems = storedCart ? JSON.parse(storedCart) : [];
+        renderCartItems();
+    }
+
+    function saveCart(){
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(window.cartItems));
+    }
+
+    function renderCartItems(){
+        const container = document.getElementById('cart-items-container');
+        container.innerHTML = '';
+        if(window.cartItems.length===0){
+            container.innerHTML = `<p class="text-gray-500 text-center mt-6">Your cart is empty.</p>`;
+            document.getElementById('checkout-button').disabled=true;
+            updateCartTotals();
+            updateCartCount();
+            return;
+        }
+        window.cartItems.forEach(item=>{
+            const div = document.createElement('div');
+            div.className="flex items-center justify-between space-x-4 border-b border-gray-100 pb-3";
+            div.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
+                    <div>
+                        <h4 class="font-semibold text-gray-900">(${item.quantity}) ${item.name}</h4>
+                        <p class="text-gray-500 text-sm">$${item.price.toFixed(2)}</p>
+                        <div class="flex items-center mt-1 space-x-1">
+                            <button onclick="changeCartQuantity('${item.docId}',-1)" class="text-gray-400 hover:text-gray-600 font-bold px-2">-</button>
+                            <span class="px-2">${item.quantity}</span>
+                            <button onclick="changeCartQuantity('${item.docId}',1)" class="text-gray-400 hover:text-gray-600 font-bold px-2">+</button>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="removeCartItem('${item.docId}')" class="text-red-500 hover:text-red-700 font-bold">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        });
+        document.getElementById('checkout-button').disabled=false;
+        updateCartTotals();
+        updateCartCount();
+        if(typeof lucide!=='undefined') lucide.createIcons();
+    }
+
+    function changeCartQuantity(docId,amount){
+        const item = window.cartItems.find(i=>i.docId===docId);
+        if(!item) return;
+        item.quantity += amount;
+        if(item.quantity<=0) removeCartItem(docId);
+        else { saveCart(); renderCartItems(); }
+    }
+
+    function removeCartItem(docId){
+        window.cartItems = window.cartItems.filter(i=>i.docId!==docId);
+        saveCart();
+        renderCartItems();
+    }
+
+    function updateCartTotals(){
+        const subtotal = window.cartItems.reduce((sum,i)=>sum+i.price*i.quantity,0);
+        document.getElementById('cart-subtotal').textContent=`$${subtotal.toFixed(2)}`;
+        const totalItems = window.cartItems.reduce((sum,i)=>sum+i.quantity,0);
+        document.getElementById('total-items').textContent=totalItems;
+        const total = subtotal + subtotal*0.12;
+        document.getElementById('cart-total').textContent=`$${total.toFixed(2)}`;
+    }
+
+    function updateCartCount(){
+        const count = window.cartItems.reduce((sum,i)=>sum+i.quantity,0);
+        const cartCount = document.getElementById('cart-count');
+        if(count>0){ cartCount.classList.remove('hidden'); cartCount.textContent=count;}
+        else cartCount.classList.add('hidden');
+    }
+
+    function openCartSidebar(){ document.getElementById('cart-sidebar').classList.remove('translate-x-full'); document.getElementById('cart-overlay').classList.remove('hidden'); }
+    function closeCartSidebar(){ document.getElementById('cart-sidebar').classList.add('translate-x-full'); document.getElementById('cart-overlay').classList.add('hidden'); }
+
+    function showToast(message){
+        const toast = document.getElementById('toast-notification');
+        const toastMessage = document.getElementById('toast-message');
+        toastMessage.textContent=message;
+        toast.classList.remove('hidden');
+        requestAnimationFrame(()=>{ toast.classList.remove('translate-x-[150%]'); toast.classList.add('translate-x-0'); });
+        setTimeout(()=>{ toast.classList.remove('translate-x-0'); toast.classList.add('translate-x-[150%]'); setTimeout(()=>toast.classList.add('hidden'),500); },3000);
+    }
+</script>
+
+</body>
+</html>

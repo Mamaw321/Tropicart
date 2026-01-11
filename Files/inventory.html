@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tropicart Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { inter: ['Inter', 'sans-serif'] },
+          colors: { 'brand-primary': '#F97316' }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="font-inter bg-gray-100 min-h-screen flex">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 bg-white shadow-lg h-screen fixed left-0 top-0 p-6 space-y-6">
+    <h1 class="text-2xl font-extrabold text-brand-primary">Tropicart Admin</h1>
+    <nav class="flex flex-col space-y-3">
+      <a href="#dashboard" class="font-medium text-gray-700 hover:text-brand-primary">📊 Dashboard</a>
+      <a href="#add-product" class="font-medium text-gray-700 hover:text-brand-primary">➕ Add Product</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="ml-64 flex-1 p-10">
+
+    <!-- DASHBOARD SECTION -->
+    <section id="dashboard" class="mb-16">
+      <h2 class="text-3xl font-bold text-gray-900 mb-6">Dashboard Overview</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Card 1 -->
+        <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+          <p class="text-gray-600">Total Products</p>
+          <h3 class="text-3xl font-bold mt-2">48</h3>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+          <p class="text-gray-600">Today's Orders</p>
+          <h3 class="text-3xl font-bold mt-2">12</h3>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+          <p class="text-gray-600">Low Stock Items</p>
+          <h3 class="text-3xl font-bold mt-2">3</h3>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+          <p class="text-gray-600">Pending Reviews</p>
+          <h3 class="text-3xl font-bold mt-2">5</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADD PRODUCT SECTION -->
+    <section id="add-product" class="mt-10">
+      <h2 class="text-3xl font-bold text-gray-900 mb-8">Add New Product</h2>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Product Info Card -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+          <h3 class="text-xl font-semibold mb-4">Product Details</h3>
+
+          <label class="block mb-3 font-medium">Name</label>
+          <input type="text" class="w-full p-2 border rounded-lg mb-4" placeholder="e.g., Mango" />
+
+          <label class="block mb-3 font-medium">Price</label>
+          <input type="number" class="w-full p-2 border rounded-lg mb-4" placeholder="e.g., 120" />
+
+          <label class="block mb-3 font-medium">Category</label>
+          <select class="w-full p-2 border rounded-lg mb-4">
+            <option>Fruit</option>
+            <option>Juice</option>
+            <option>Vegetable</option>
+          </select>
+        </div>
+
+        <!-- Image Upload Card -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+          <h3 class="text-xl font-semibold mb-4">Upload Image</h3>
+
+          <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+            <p class="text-gray-600 mb-3">Drag & Drop or Click to Upload</p>
+            <input type="file" accept="image/*" class="w-full" />
+          </div>
+        </div>
+
+        <!-- Submit Card -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 flex flex-col justify-between">
+          <div>
+            <h3 class="text-xl font-semibold mb-4">Publish</h3>
+            <p class="text-gray-600 mb-4">Make sure all information is correct before submitting.</p>
+          </div>
+          <button class="w-full bg-brand-primary text-white py-3 rounded-xl font-semibold shadow hover:bg-orange-600 transition">Add Product</button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>
