@@ -74,7 +74,7 @@ Admin Login
 **Developer Information**
 
 Members
-
+Group Name - Qwerty
 1) Elaine Mae Sandigan - Role (Front-end Developer and Backend Developer) 
 2) Jeremiah Roilo -  Role (Documentation) 
 3) Mikylla Nicole Jereza - Role (Documentation) 
